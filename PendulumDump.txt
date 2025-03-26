@@ -1,0 +1,1349 @@
+
+; 64tass Turbo Assembler Macro V1.59.3120 listing file
+; 64tass -L PendulumDump.txt --output-exec=start --intel-hex --output pendulum.hex pendulum.asm
+; Tue Mar 25 23:57:04 2025
+
+;Offset	;Hex		;Monitor	;Source
+
+;******  Processing input file: pendulum.asm
+
+
+;******  Processing file: setup.asm
+
+=$01					MMU_IO_CTRL 	= $01						;MMU I/O Control
+=$d000					VKY_MSTR_CTRL_0 = $d000						; Vicky Master Control Register 0
+=$d001					VKY_MSTR_CTRL_1 = $d001						; Vicky Master Control Register 1
+=$d004					VKY_BRDR_CTRL   = $d004						; Vicky Border Control Register
+=$d00d					VKY_BKG_COL_B   = $d00d						; Vicky Graphics Background Color Blue
+=$d00e					VKY_BKG_COL_G   = $d00e						; Vicky Graphics Background Color Green
+=$d00f					VKY_BKG_COL_R   = $d00f						; Vicky Graphics Background Color Red
+=$d002					VKY_LAYER_CTRL_0= $d002
+=$d003					VKY_LAYER_CTRL_1= $d003
+=$d280					VKY_TS0_AD_L	= $d280						; Vicky Tile 0 Image Start Address LOW BYTE
+=$d281					VKY_TS0_AD_M	= $d281						; Vicky Tile 0 Image Start Address MEDIUM BYTE
+=$d282					VKY_TS0_AD_H	= $d282						; Vicky Tile 0 Image Start Address HIGH BYTE
+=$d284					VKY_TS1_AD_L	= $d284						; Vicky Tile 1 Image Start Address LOW BYTE
+=$d285					VKY_TS1_AD_M	= $d285						; Vicky Tile 1 Image Start Address MEDIUM BYTE
+=$d286					VKY_TS1_AD_H	= $d286						; Vicky Tile 1 Image Start Address HIGH BYTE
+=$d288					VKY_TS2_AD_L	= $d288						; Vicky Tile 2 Image Start Address LOW BYTE
+=$d289					VKY_TS2_AD_M	= $d289						; Vicky Tile 2 Image Start Address MEDIUM BYTE
+=$d28a					VKY_TS2_AD_H	= $d28a						; Vicky Tile 2 Image Start Address HIGH BYTE
+=$d200					VKY_TM0_CTRL	= $d200						; Tile Map 0 Control
+=$d201					VKY_TM0_AD_L	= $d201						; Tile Map 0 Start Address LOW BYTE
+=$d202					VKY_TM0_AD_M	= $d202						; Tile Map 0 Start Address MEDIUM BYTE
+=$d203					VKY_TM0_AD_H	= $d203						; Tile Map 0 Start Address HIGH BYTE
+=$d204					VKY_TM0_SZ_X	= $d204						; Tile Map 0 Size X
+=$d206					VKY_TM0_SZ_Y	= $d206						; Tile Map 0 Size Y
+=$d208					VKY_TM0_POS_X_L = $d208						; Tile Map 0 X Position & Scroll LOW BYTE
+=$d209					VKY_TM0_POS_X_H = $d209						; Tile Map 0 X Position & Scroll HIGH BYTE
+=$d20a					VKY_TM0_POS_Y_L = $d20a						; Tile Map 0 Y Position & Scroll LOW BYTE
+=$d20b					VKY_TM0_POS_Y_H = $d20b						; Tile Map 0 Y Position & Scroll HIGH BYTE
+=$d20c					VKY_TM1_CTRL	= $d20c						; Tile Map 1 Control
+=$d20d					VKY_TM1_AD_L	= $d20d						; Tile Map 1 Start Address LOW BYTE
+=$d20e					VKY_TM1_AD_M	= $d20e						; Tile Map 1 Start Address MEDIUM BYTE
+=$d20f					VKY_TM1_AD_H	= $d20f						; Tile Map 1 Start Address HIGH BYTE
+=$d210					VKY_TM1_SZ_X	= $d210						; Tile Map 1 Size X
+=$d212					VKY_TM1_SZ_Y	= $d212						; Tile Map 1 Size Y
+=$d214					VKY_TM1_POS_X_L = $d214						; Tile Map 1 X Position & Scroll LOW BYTE
+=$d215					VKY_TM1_POS_X_H = $d215						; Tile Map 1 X Position & Scroll HIGH BYTE
+=$d216					VKY_TM1_POS_Y_L = $d216						; Tile Map 1 Y Position & Scroll LOW BYTE
+=$d217					VKY_TM1_POS_Y_H = $d217						; Tile Map 1 Y Position & Scroll HIGH BYTE
+=$d218					VKY_TM2_CTRL	= $d218						; Tile Map 2 Control
+=$d219					VKY_TM2_AD_L	= $d219						; Tile Map 2 Start Address LOW BYTE
+=$d21a					VKY_TM2_AD_M	= $d21a						; Tile Map 2 Start Address MEDIUM BYTE
+=$d21b					VKY_TM2_AD_H	= $d21b						; Tile Map 2 Start Address HIGH BYTE
+=$d21c					VKY_TM2_SZ_X	= $d21c						; Tile Map 2 Size X
+=$d21e					VKY_TM2_SZ_Y	= $d21e						; Tile Map 2 Size Y
+=$d220					VKY_TM2_POS_X_L = $d220						; Tile Map 2 X Position & Scroll LOW BYTE
+=$d221					VKY_TM2_POS_X_H = $d221						; Tile Map 2 X Position & Scroll HIGH BYTE
+=$d222					VKY_TM2_POS_Y_L = $d222						; Tile Map 2 Y Position & Scroll LOW BYTE
+=$d223					VKY_TM2_POS_Y_H = $d223						; Tile Map 2 Y Position & Scroll HIGH BYTE
+=$d900					VKY_SP0         = $d900                     ; start of sprite register locations / each new aprite is a multiple of 8
+=$00					SP_CTRL         = $00                       ; control register              7-x, 6/5-size, 4/3-layer, 2/1-lut, 0-enable
+=$01					SP_AD_L         = $01                       ; image address location
+=$02					SP_AD_M         = $02
+=$03					SP_AD_H         = $03
+=$04					SP_POS_X_L      = $04                       ; x position
+=$05					SP_POS_X_H      = $05
+=$06					SP_POS_Y_L      = $06                       ; y position
+=$07					SP_POS_Y_H      = $07
+=$d9a0					playerSP        = $d9a0                     ; the sprite registers for the player
+=$d000					VKY_GR_CLUT_0  	= $d000						; Graphics LUT #0 in I/O page 1
+=$d400					VKY_GR_CLUT_1  	= $d400						; Graphics LUT #1 in I/O page 1
+=$d400					SID_L1_FREQ_L   = $d400                     ; Left Sid Registers
+=$d401					SID_L1_FREQ_H   = $d401
+=$d402					SID_L1_PULS_L   = $d402
+=$d403					SID_L1_PULS_H   = $d403
+=$d404					SID_L1_GATE     = $d404
+=$d405					SID_L1_ATDL     = $d405
+=$d406					SID_L1_STRL     = $d406
+=$d407					SID_L2_FREQ_L   = $d407
+=$d408					SID_L2_FREQ_H   = $d408
+=$d409					SID_L2_PULS_L   = $d409
+=$d40a					SID_L2_PULS_H   = $d40a
+=$d40b					SID_L2_GATE     = $d40b
+=$d40c					SID_L2_ATDL     = $d40c
+=$d40d					SID_L2_STRL     = $d40d
+=$d40e					SID_L3_FREQ_L   = $d40e
+=$d40f					SID_L3_FREQ_H   = $d40f
+=$d410					SID_L3_PULS_L   = $d410
+=$d411					SID_L3_PULS_H   = $d411
+=$d412					SID_L3_GATE     = $d412
+=$d413					SID_L3_ATDL     = $d413
+=$d414					SID_L3_STRL     = $d414
+=$d415					SID_L_FLT_L     = $d415
+=$d416					SID_L_FLT_H     = $d416
+=$d417					SID_L_RES       = $d417
+=$d418					SID_L_VOL       = $d418
+=$d500					SID_R1_FREQ_L   = $d500                     ; Right Sid Registers
+=$d501					SID_R1_FREQ_H   = $d501
+=$d502					SID_R1_PULS_L   = $d502
+=$d503					SID_R1_PULS_H   = $d503
+=$d504					SID_R1_GATE     = $d504
+=$d505					SID_R1_ATDL     = $d505
+=$d506					SID_R1_STRL     = $d506
+=$d507					SID_R2_FREQ_L   = $d507
+=$d508					SID_R2_FREQ_H   = $d508
+=$d509					SID_R2_PULS_L   = $d509
+=$d50a					SID_R2_PULS_H   = $d50a
+=$d50b					SID_R2_GATE     = $d50b
+=$d50c					SID_R2_ATDL     = $d50c
+=$d50d					SID_R2_STRL     = $d50d
+=$d50e					SID_R3_FREQ_L   = $d50e
+=$d50f					SID_R3_FREQ_H   = $d50f
+=$d510					SID_R3_PULS_L   = $d510
+=$d511					SID_R3_PULS_H   = $d511
+=$d512					SID_R3_GATE     = $d512
+=$d513					SID_R3_ATDL     = $d513
+=$d514					SID_R3_STRL     = $d514
+=$d515					SID_R_FLT_L     = $d515
+=$d516					SID_R_FLT_H     = $d516
+=$d517					SID_R_RES       = $d517
+=$d518					SID_R_VOL       = $d518
+=$d600					PSG_L           = $d600
+=$d610					PSG_R           = $d610
+=$d608					PSG_LR          = $d608
+=$80					PSG1_FREQ_LO    = %10000000                 ; OR with low 4 bits
+=$00					PSG1_FREQ_HI    = %00000000                 ; OR with low 6 bits
+=$90					PSG1_VOLUME     = %10010000                 ; OR with low 4 bits / default is full  - 0 = full, f = silent
+=$a0					PSG2_FREQ_LO    = %10100000                 ; OR with low 4 bits
+=$00					PSG2_FREQ_HI    = %00000000                 ; OR with low 6 bits
+=$b0					PSG2_VOLUME     = %10110000                 ; OR with low 4 bits / default is full  - 0 = full, f = silent
+=$c0					PSG3_FREQ_LO    = %11000000                 ; OR with low 4 bits
+=$00					PSG3_FREQ_HI    = %00000000                 ; OR with low 6 bits
+=$d0					PSG3_VOLUME     = %11010000                 ; OR with low 4 bits / default is full  - 0 = full, f = silent
+=$dda1					MIDI_COM        = $dda1                     ; midi command
+=$fffe					VIRQ			= $fffe						; Pointer to IRQ routine (LOW Byte)
+=$d660					INT_PEND_0		= $d660						; Pending register for interrupts 0-7
+=$d661					INT_PEND_1		= $d661						; Pending register for interrupts 8-15
+=$d66c					INT_MASK_0		= $d66c						; Mask register for interrupts 0-7
+=$d66d					INT_MASK_1		= $d66d						; Mask register for interrupts 8-15
+=$de00					MULU_A_L		= $de00						; unsigned A LOW byte
+=$de01					MULU_A_H		= $de01						; unsigned A HIGH Byte
+=$de02					MULU_B_L		= $de02						; unsigned B LOW byte
+=$de03					MULU_B_H		= $de03						; unsigned B HIGH byte
+=$de10					MULU_LL			= $de10						; A x B byte 0
+=$de11					MULU_LH			= $de11						; A x B byte 1
+=$de12					MULU_HL			= $de12						; A x B byte 3
+=$de13					MULU_HH			= $de13						; A x B byte 4
+=$de08					ADD_A_LL		= $de08
+=$de09					ADD_A_LH		= $de09
+=$de0a					ADD_A_HL		= $de0a
+=$de0b					ADD_A_HH		= $de0b
+=$de0c					ADD_B_LL		= $de0c
+=$de0d					ADD_B_LH		= $de0d
+=$de0e					ADD_B_HL		= $de0e
+=$de0f					ADD_B_HH		= $de0f
+=$de18					ADD_R_LL		= $de18
+=$de19					ADD_R_LH		= $de19
+=$de1a					ADD_R_HL		= $de1a
+=$de1b					ADD_R_HH		= $de1b
+=$d6a6					Random_Reg		= $d6a6
+=$d6a4					Random_L		= $d6a4
+=$80					ptr_src			= $80						; A pointer to read data
+=$82					ptr_dst			= $82						; A pointer to write data
+
+;******  Return to file: pendulum.asm
+
+.1ffd					start:
+.1ffd	4c 0b 20	jmp $200b			jmp SC								; Start of the program - We put this jump here so you can load the PGZ into the computer.
+
+;******  Processing file: api.asm
+
+>ff00					NextEvent   .fill   4   ; Copy the next event into user-space.
+>ff04					ReadData    .fill   4   ; Copy primary bulk event data into user-space
+>ff08					ReadExt     .fill   4   ; Copy secondary bolk event data into user-space
+>ff0c					Yield       .fill   4   ; Give unused time to the kernel.
+>ff10					Putch       .fill   4   ; deprecated
+>ff14					RunBlock    .fill   4   ; Chain to resident program by block ID.
+>ff18					RunNamed    .fill   4   ; Chain to resident program by name.
+>ff1c					            .fill   4   ; reserved
+>ff20					List        .fill   4   ; Returns a bit-set of available block-accessible devices.
+>ff24					GetName     .fill   4   ; Gets the hardware level name of the given block device or media.
+>ff28					GetSize     .fill   4   ; Get the number of raw sectors (48 bits) for the given device
+>ff2c					Read        .fill   4   ; Read a raw sector (48 bit LBA)
+>ff30					Write       .fill   4   ; Write a raw sector (48 bit LBA)
+>ff34					Format      .fill   4   ; Perform a low-level format if the media support it.
+>ff38					Export      .fill   4   ; Update the FileSystem table with the partition table (if present).
+>ff3c					List        .fill   4   ; Returns a bit-set of available logical devices.
+>ff40					GetSize     .fill   4   ; Get the size of the partition or logical device in sectors.
+>ff44					MkFS        .fill   4   ; Creates a new file-system on the logical device.
+>ff48					CheckFS     .fill   4   ; Checks the file-system for errors and corrects them.
+>ff4c					Mount       .fill   4   ; Mark the file-system as available for File and Directory operations.
+>ff50					Unmount     .fill   4   ; Mark the file-system as unavailable for File and Directory operations.
+>ff54					ReadBlock   .fill   4   ; Read a partition-local raw sector on an unmounted device.
+>ff58					WriteBlock  .fill   4   ; Write a partition-local raw sector on an unmounted device.
+>ff5c					Open        .fill   4   ; Open the given file for read, create, or append.
+>ff60					Read        .fill   4   ; Request bytes from a file opened for reading.
+>ff64					Write       .fill   4   ; Write bytes to a file opened for create or append.
+>ff68					Close       .fill   4   ; Close an open file.
+>ff6c					Rename      .fill   4   ; Rename a closed file.
+>ff70					Delete      .fill   4   ; Delete a closed file.
+>ff74					Seek        .fill   4   ; Seek to a specific position in a file.
+>ff78					Open        .fill   4   ; Open a directory for reading.
+>ff7c					Read        .fill   4   ; Read a directory entry; may also return VOLUME and FREE events.
+>ff80					Close       .fill   4   ; Close a directory once finished reading.
+>ff84					MkDir       .fill   4   ; Create a directory
+>ff88					RmDir       .fill   4   ; Delete a directory
+>ff8c					            .fill   4   ; call gate
+>ff90					GetIP       .fill   4   ; Get the local IP address.
+>ff94					SetIP       .fill   4   ; Set the local IP address.
+>ff98					GetDNS      .fill   4   ; Get the configured DNS IP address.
+>ff9c					SetDNS      .fill   4   ; Set the configured DNS IP address.
+>ffa0					SendICMP    .fill   4
+>ffa4					Match       .fill   4
+>ffa8					Init        .fill   4
+>ffac					Send        .fill   4
+>ffb0					Recv        .fill   4
+>ffb4					Open        .fill   4
+>ffb8					Accept      .fill   4
+>ffbc					Reject      .fill   4
+>ffc0					Send        .fill   4
+>ffc4					Recv        .fill   4
+>ffc8					Close       .fill   4
+>ffcc					Reset       .fill   4   ; Re-init the display
+>ffd0					GetSize     .fill   4   ; Returns rows/cols in kernel args.
+>ffd4					DrawRow     .fill   4   ; Draw text/color buffers left-to-right
+>ffd8					DrawColumn  .fill   4   ; Draw text/color buffers top-to-bottom
+>ffdc					GetTime     .fill   4
+>ffe0					SetTime     .fill   4
+>ffe4					            .fill   12  ; 65816 vectors
+>fff0					SetTimer    .fill   4
+.00f0					args
+.00f0					events
+>00f0					dest        .word       ?   ; GetNextEvent copies event data here
+>00f2					pending     .byte       ?   ; Negative count of pending events
+.00f3					end
+.00f3					run
+>00f3					block_id    .byte   ?
+.00f3					recv
+=$fb					buf         = args.buf
+=$fd					buflen      = args.buflen
+.00f3					fs
+.00f3					format
+>00f3					drive       .byte       ?
+>00f4					cookie      .byte       ?
+=$fb					label       = args.buf
+=$fd					label_len   = args.buflen
+.00f3					mkfs
+>00f3					drive       .byte       ?
+>00f4					cookie      .byte       ?
+=$fb					label       = args.buf
+=$fd					label_len   = args.buflen
+.00f3					file
+.00f3					open
+>00f3					drive       .byte       ?
+>00f4					cookie      .byte       ?
+=$fb					fname       = args.buf
+=$fd					fname_len   = args.buflen
+>00f5					mode        .byte       ?
+=0					READ        = 0
+=1					WRITE       = 1
+=2					END         = 2
+.00f3					read
+>00f3					stream      .byte       ?
+>00f4					buflen      .byte       ?
+.00f3					write
+>00f3					stream      .byte       ?
+=$fb					buf         = args.buf
+=$fd					buflen      = args.buflen
+.00f3					seek
+>00f3					stream      .byte       ?
+>00f4					position    .dword      ?
+.00f3					close
+>00f3					stream      .byte       ?
+.00f3					rename
+>00f3					drive       .byte       ?
+>00f4					cookie      .byte       ?
+=$fb					old         = args.buf
+=$fd					old_len     = args.buflen
+=$f8					new         = args.ext
+=$fa					new_len     = args.extlen
+.00f3					delete
+>00f3					drive       .byte       ?
+>00f4					cookie      .byte       ?
+=$fb					fname       = args.buf
+=$fd					fname_len   = args.buflen
+>00f5					mode        .byte       ?
+=0					READ        = 0
+=1					WRITE       = 1
+=2					END         = 2
+.00f3					directory
+.00f3					open
+>00f3					drive       .byte       ?
+>00f4					cookie      .byte       ?
+=$fb					path        = args.buf
+=$fd					path_len    = args.buflen
+.00f3					read
+>00f3					stream      .byte       ?
+>00f4					buflen      .byte       ?
+.00f3					close
+>00f3					stream      .byte       ?
+.00f3					mkdir
+>00f3					drive       .byte       ?
+>00f4					cookie      .byte       ?
+=$fb					path        = args.buf
+=$fd					path_len    = args.buflen
+.00f3					rmdir
+>00f3					drive       .byte       ?
+>00f4					cookie      .byte       ?
+=$fb					path        = args.buf
+=$fd					path_len    = args.buflen
+.00f3					display
+>00f3					x           .byte       ?   ; coordinate or size
+>00f4					y           .byte       ?   ; coordinate or size
+=$fb					text        = args.buf      ; text
+=$f8					color       = args.ext      ; color
+=$fb					buf         = args.buf      ; deprecated
+=$f8					buf2        = args.ext      ; deprecated
+=$fd					buflen      = args.buflen
+.00f3					net
+=$fb					socket      = args.buf
+>00f3					src_port    .word       ?
+>00f5					dest_port   .word       ?
+>00f7					dest_ip     .fill       4
+>00f3					accepted    .byte       ?
+=$f8					buf         = args.ext
+=$fa					buflen      = args.extlen
+.00f3					config
+.00f3					timer
+>00f3					units       .byte       ?
+=0					FRAMES      = 0
+=1					SECONDS     = 1
+=128					QUERY       = 128
+>00f4					absolute    .byte       ?
+>00f5					cookie      .byte       ?
+=$f8					ext         = $f8
+=$fa					extlen      = $fa
+=$fb					buf         = $fb
+=$fd					buflen      = $fd
+=$fe					ptr         = $fe
+.0000					events
+>0000					dest        .word       ?   ; GetNextEvent copies event data here
+>0002					pending     .byte       ?   ; Negative count of pending events
+.0003					end
+.0003					run
+>0003					block_id    .byte   ?
+.0003					recv
+=$fb					buf         = args.buf
+=$fd					buflen      = args.buflen
+.0003					fs
+.0003					format
+>0003					drive       .byte       ?
+>0004					cookie      .byte       ?
+=$fb					label       = args.buf
+=$fd					label_len   = args.buflen
+.0003					mkfs
+>0003					drive       .byte       ?
+>0004					cookie      .byte       ?
+=$fb					label       = args.buf
+=$fd					label_len   = args.buflen
+.0003					file
+.0003					open
+>0003					drive       .byte       ?
+>0004					cookie      .byte       ?
+=$fb					fname       = args.buf
+=$fd					fname_len   = args.buflen
+>0005					mode        .byte       ?
+=0					READ        = 0
+=1					WRITE       = 1
+=2					END         = 2
+.0003					read
+>0003					stream      .byte       ?
+>0004					buflen      .byte       ?
+.0003					write
+>0003					stream      .byte       ?
+=$fb					buf         = args.buf
+=$fd					buflen      = args.buflen
+.0003					seek
+>0003					stream      .byte       ?
+>0004					position    .dword      ?
+.0003					close
+>0003					stream      .byte       ?
+.0003					rename
+>0003					drive       .byte       ?
+>0004					cookie      .byte       ?
+=$fb					old         = args.buf
+=$fd					old_len     = args.buflen
+=$f8					new         = args.ext
+=$fa					new_len     = args.extlen
+.0003					delete
+>0003					drive       .byte       ?
+>0004					cookie      .byte       ?
+=$fb					fname       = args.buf
+=$fd					fname_len   = args.buflen
+>0005					mode        .byte       ?
+=0					READ        = 0
+=1					WRITE       = 1
+=2					END         = 2
+.0003					directory
+.0003					open
+>0003					drive       .byte       ?
+>0004					cookie      .byte       ?
+=$fb					path        = args.buf
+=$fd					path_len    = args.buflen
+.0003					read
+>0003					stream      .byte       ?
+>0004					buflen      .byte       ?
+.0003					close
+>0003					stream      .byte       ?
+.0003					mkdir
+>0003					drive       .byte       ?
+>0004					cookie      .byte       ?
+=$fb					path        = args.buf
+=$fd					path_len    = args.buflen
+.0003					rmdir
+>0003					drive       .byte       ?
+>0004					cookie      .byte       ?
+=$fb					path        = args.buf
+=$fd					path_len    = args.buflen
+.0003					display
+>0003					x           .byte       ?   ; coordinate or size
+>0004					y           .byte       ?   ; coordinate or size
+=$fb					text        = args.buf      ; text
+=$f8					color       = args.ext      ; color
+=$fb					buf         = args.buf      ; deprecated
+=$f8					buf2        = args.ext      ; deprecated
+=$fd					buflen      = args.buflen
+.0003					net
+=$fb					socket      = args.buf
+>0003					src_port    .word       ?
+>0005					dest_port   .word       ?
+>0007					dest_ip     .fill       4
+>0003					accepted    .byte       ?
+=$f8					buf         = args.ext
+=$fa					buflen      = args.extlen
+.0003					config
+.0003					timer
+>0003					units       .byte       ?
+=0					FRAMES      = 0
+=1					SECONDS     = 1
+=128					QUERY       = 128
+>0004					absolute    .byte       ?
+>0005					cookie      .byte       ?
+=$f8					ext         = $f8
+=$fa					extlen      = $fa
+=$fb					buf         = $fb
+=$fd					buflen      = $fd
+=$fe					ptr         = $fe
+>0000					dest        .word       ?   ; GetNextEvent copies event data here
+>0002					pending     .byte       ?   ; Negative count of pending events
+.0003					end
+=$fb					buf         = args.buf
+=$fd					buflen      = args.buflen
+>0000					block_id    .byte   ?
+.0000					format
+>0000					drive       .byte       ?
+>0001					cookie      .byte       ?
+=$fb					label       = args.buf
+=$fd					label_len   = args.buflen
+.0000					mkfs
+>0000					drive       .byte       ?
+>0001					cookie      .byte       ?
+=$fb					label       = args.buf
+=$fd					label_len   = args.buflen
+>0000					drive       .byte       ?
+>0001					cookie      .byte       ?
+=$fb					label       = args.buf
+=$fd					label_len   = args.buflen
+.0000					open
+>0000					drive       .byte       ?
+>0001					cookie      .byte       ?
+=$fb					fname       = args.buf
+=$fd					fname_len   = args.buflen
+>0002					mode        .byte       ?
+=0					READ        = 0
+=1					WRITE       = 1
+=2					END         = 2
+.0000					read
+>0000					stream      .byte       ?
+>0001					buflen      .byte       ?
+.0000					write
+>0000					stream      .byte       ?
+=$fb					buf         = args.buf
+=$fd					buflen      = args.buflen
+.0000					seek
+>0000					stream      .byte       ?
+>0001					position    .dword      ?
+.0000					close
+>0000					stream      .byte       ?
+.0000					rename
+>0000					drive       .byte       ?
+>0001					cookie      .byte       ?
+=$fb					old         = args.buf
+=$fd					old_len     = args.buflen
+=$f8					new         = args.ext
+=$fa					new_len     = args.extlen
+.0000					delete
+>0000					drive       .byte       ?
+>0001					cookie      .byte       ?
+=$fb					fname       = args.buf
+=$fd					fname_len   = args.buflen
+>0002					mode        .byte       ?
+=0					READ        = 0
+=1					WRITE       = 1
+=2					END         = 2
+>0000					drive       .byte       ?
+>0001					cookie      .byte       ?
+=$fb					fname       = args.buf
+=$fd					fname_len   = args.buflen
+>0002					mode        .byte       ?
+=0					READ        = 0
+=1					WRITE       = 1
+=2					END         = 2
+>0000					stream      .byte       ?
+>0001					buflen      .byte       ?
+>0000					stream      .byte       ?
+=$fb					buf         = args.buf
+=$fd					buflen      = args.buflen
+>0000					stream      .byte       ?
+>0001					position    .dword      ?
+>0000					stream      .byte       ?
+>0000					drive       .byte       ?
+>0001					cookie      .byte       ?
+=$fb					old         = args.buf
+=$fd					old_len     = args.buflen
+=$f8					new         = args.ext
+=$fa					new_len     = args.extlen
+>0000					drive       .byte       ?
+>0001					cookie      .byte       ?
+=$fb					fnane       = args.buf
+=$fd					fname_len   = args.buflen
+.0000					open
+>0000					drive       .byte       ?
+>0001					cookie      .byte       ?
+=$fb					path        = args.buf
+=$fd					path_len    = args.buflen
+.0000					read
+>0000					stream      .byte       ?
+>0001					buflen      .byte       ?
+.0000					close
+>0000					stream      .byte       ?
+.0000					mkdir
+>0000					drive       .byte       ?
+>0001					cookie      .byte       ?
+=$fb					path        = args.buf
+=$fd					path_len    = args.buflen
+.0000					rmdir
+>0000					drive       .byte       ?
+>0001					cookie      .byte       ?
+=$fb					path        = args.buf
+=$fd					path_len    = args.buflen
+>0000					drive       .byte       ?
+>0001					cookie      .byte       ?
+=$fb					path        = args.buf
+=$fd					path_len    = args.buflen
+>0000					stream      .byte       ?
+>0001					buflen      .byte       ?
+>0000					stream      .byte       ?
+>0000					x           .byte       ?   ; coordinate or size
+>0001					y           .byte       ?   ; coordinate or size
+=$fb					text        = args.buf      ; text
+=$f8					color       = args.ext      ; color
+=$fb					buf         = args.buf      ; deprecated
+=$f8					buf2        = args.ext      ; deprecated
+=$fd					buflen      = args.buflen
+=$fb					socket      = args.buf
+>0000					src_port    .word       ?
+>0002					dest_port   .word       ?
+>0004					dest_ip     .fill       4
+>0000					accepted    .byte       ?
+=$f8					buf         = args.ext
+=$fa					buflen      = args.extlen
+>0000					units       .byte       ?
+=0					FRAMES      = 0
+=1					SECONDS     = 1
+=128					QUERY       = 128
+>0001					absolute    .byte       ?
+>0002					cookie      .byte       ?
+>0000					century     .byte       ?
+>0001					year        .byte       ?
+>0002					month       .byte       ?
+>0003					day         .byte       ?
+>0004					hours       .byte       ?
+>0005					minutes     .byte       ?
+>0006					seconds     .byte       ?
+>0007					centis      .byte       ?
+.0008					size
+>0000					            .word   ?   ; Reserved
+>0002					            .word   ?   ; Deprecated
+>0004					JOYSTICK    .word   ?   ; Game Controller changes.
+>0006					DEVICE      .word   ?   ; Device added/removed.
+>0008					PRESSED     .word   ?   ; Key pressed
+>000a					RELEASED    .word   ?   ; Key released.
+>000c					DELTA       .word   ?   ; Regular mouse move and button state
+>000e					CLICKS      .word   ?   ; Click counts
+>0010					NAME        .word   ?
+>0012					SIZE        .word   ?
+>0014					DATA        .word   ?   ; The read request has succeeded.
+>0016					WROTE       .word   ?   ; The write request has completed.
+>0018					FORMATTED   .word   ?   ; The low-level format has completed.
+>001a					ERROR       .word   ?
+>001c					SIZE        .word   ?
+>001e					CREATED     .word   ?
+>0020					CHECKED     .word   ?
+>0022					DATA        .word   ?   ; The read request has succeeded.
+>0024					WROTE       .word   ?   ; The write request has completed.
+>0026					ERROR       .word   ?
+>0028					NOT_FOUND   .word   ?   ; The file file was not found.
+>002a					OPENED      .word   ?   ; The file was successfully opened.
+>002c					DATA        .word   ?   ; The read request has succeeded.
+>002e					WROTE       .word   ?   ; The write request has completed.
+>0030					EOF         .word   ?   ; All file data has been read.
+>0032					CLOSED      .word   ?   ; The close request has completed.
+>0034					RENAMED     .word   ?   ; The rename request has completed.
+>0036					DELETED     .word   ?   ; The delete request has completed.
+>0038					ERROR       .word   ?   ; An error occured; close the file if opened.
+>003a					SEEK        .word   ?   ; The seek request has completed.
+>003c					OPENED      .word   ?   ; The directory open request succeeded.
+>003e					VOLUME      .word   ?   ; A volume record was found.
+>0040					FILE        .word   ?   ; A file record was found.
+>0042					FREE        .word   ?   ; A file-system free-space record was found.
+>0044					EOF         .word   ?   ; All data has been read.
+>0046					CLOSED      .word   ?   ; The directory file has been closed.
+>0048					ERROR       .word   ?   ; An error occured; user should close.
+>004a					CREATED     .word   ?   ; The directory has been created.
+>004c					DELETED     .word   ?   ; The directory has been deleted.
+>004e					TCP         .word   ?
+>0050					UDP         .word   ?
+>0052					EXPIRED     .word   ?
+>0054					TICK        .word   ?
+>0000					type        .byte   ?   ; Enum above
+>0001					buf         .byte   ?   ; page id or zero
+>0002					ext         .byte   ?   ; page id or zero
+.0003					key
+>0003					keyboard    .byte   ?   ; Keyboard ID
+>0004					raw         .byte   ?   ; Raw key ID
+>0005					ascii       .byte   ?   ; ASCII value
+>0006					flags       .byte   ?   ; Flags (META)
+=$80					META        = $80       ; Meta key; no associated ASCII value.
+.0003					mouse
+.0003					delta
+>0003					x           .byte   ?
+>0004					y           .byte   ?
+>0005					z           .byte   ?
+>0006					buttons     .byte   ?
+.0003					clicks
+>0003					inner       .byte   ?
+>0004					middle      .byte   ?
+>0005					outer       .byte   ?
+.0003					joystick
+>0003					joy0        .byte   ?
+>0004					joy1        .byte   ?
+.0003					udp
+>0003					token       .byte   ?   ; TODO: break out into fields
+.0003					tcp
+>0003					len         .byte   ?   ; Raw packet length.
+.0003					file
+>0003					stream      .byte   ?
+>0004					cookie      .byte   ?
+.0005					data
+>0005					requested   .byte   ?   ; Requested number of bytes to read
+>0006					read        .byte   ?   ; Number of bytes actually read
+.0005					wrote
+>0005					requested   .byte   ?   ; Requested number of bytes to read
+>0006					wrote       .byte   ?   ; Number of bytes actually read
+.0003					directory
+>0003					stream      .byte   ?
+>0004					cookie      .byte   ?
+.0005					volume
+>0005					len         .byte   ?   ; Length of volname (in buf)
+>0006					flags       .byte   ?   ; block size, text encoding
+.0005					file
+>0005					len         .byte   ?
+>0006					flags       .byte   ?   ; block scale, text encoding, approx size
+.0005					free
+>0005					flags       .byte   ?   ; block scale, text encoding, approx size
+.0003					timer
+>0003					value       .byte   ?
+>0004					cookie      .byte   ?
+>0000					keyboard    .byte   ?   ; Keyboard ID
+>0001					raw         .byte   ?   ; Raw key ID
+>0002					ascii       .byte   ?   ; ASCII value
+>0003					flags       .byte   ?   ; Flags (META)
+=$80					META        = $80       ; Meta key; no associated ASCII value.
+.0000					delta
+>0000					x           .byte   ?
+>0001					y           .byte   ?
+>0002					z           .byte   ?
+>0003					buttons     .byte   ?
+.0000					clicks
+>0000					inner       .byte   ?
+>0001					middle      .byte   ?
+>0002					outer       .byte   ?
+>0000					x           .byte   ?
+>0001					y           .byte   ?
+>0002					z           .byte   ?
+>0003					buttons     .byte   ?
+>0000					inner       .byte   ?
+>0001					middle      .byte   ?
+>0002					outer       .byte   ?
+>0000					joy0        .byte   ?
+>0001					joy1        .byte   ?
+>0000					stream      .byte   ?
+>0001					cookie      .byte   ?
+.0002					data
+>0002					requested   .byte   ?   ; Requested number of bytes to read
+>0003					read        .byte   ?   ; Number of bytes actually read
+.0002					wrote
+>0002					requested   .byte   ?   ; Requested number of bytes to read
+>0003					wrote       .byte   ?   ; Number of bytes actually read
+>0000					requested   .byte   ?   ; Requested number of bytes to read
+>0001					read        .byte   ?   ; Number of bytes actually read
+>0000					requested   .byte   ?   ; Requested number of bytes to read
+>0001					wrote       .byte   ?   ; Number of bytes actually read
+>0000					stream      .byte   ?
+>0001					cookie      .byte   ?
+.0002					volume
+>0002					len         .byte   ?   ; Length of volname (in buf)
+>0003					flags       .byte   ?   ; block size, text encoding
+.0002					file
+>0002					len         .byte   ?
+>0003					flags       .byte   ?   ; block scale, text encoding, approx size
+.0002					free
+>0002					flags       .byte   ?   ; block scale, text encoding, approx size
+>0000					len         .byte   ?   ; Length of volname (in buf)
+>0001					flags       .byte   ?   ; block size, text encoding
+>0000					len         .byte   ?
+>0001					flags       .byte   ?   ; block scale, text encoding, approx size
+>0000					flags       .byte   ?   ; block scale, text encoding, approx size
+>0000					free        .fill   6   ; blocks used/free
+>0000					token       .byte   ?   ; TODO: break out into fields
+>0000					len         .byte   ?   ; Raw packet length.
+>0000					value       .byte   ?
+>0001					cookie      .byte   ?
+
+;******  Return to file: pendulum.asm
+
+.00a0					event:
+>00a0					type        .byte   ?   ; Enum above
+>00a1					buf         .byte   ?   ; page id or zero
+>00a2					ext         .byte   ?   ; page id or zero
+.00a3					key
+>00a3					keyboard    .byte   ?   ; Keyboard ID
+>00a4					raw         .byte   ?   ; Raw key ID
+>00a5					ascii       .byte   ?   ; ASCII value
+>00a6					flags       .byte   ?   ; Flags (META)
+=$80					META        = $80       ; Meta key; no associated ASCII value.
+.00a3					mouse
+.00a3					delta
+>00a3					x           .byte   ?
+>00a4					y           .byte   ?
+>00a5					z           .byte   ?
+>00a6					buttons     .byte   ?
+.00a3					clicks
+>00a3					inner       .byte   ?
+>00a4					middle      .byte   ?
+>00a5					outer       .byte   ?
+.00a3					joystick
+>00a3					joy0        .byte   ?
+>00a4					joy1        .byte   ?
+.00a3					udp
+>00a3					token       .byte   ?   ; TODO: break out into fields
+.00a3					tcp
+>00a3					len         .byte   ?   ; Raw packet length.
+.00a3					file
+>00a3					stream      .byte   ?
+>00a4					cookie      .byte   ?
+.00a5					data
+>00a5					requested   .byte   ?   ; Requested number of bytes to read
+>00a6					read        .byte   ?   ; Number of bytes actually read
+.00a5					wrote
+>00a5					requested   .byte   ?   ; Requested number of bytes to read
+>00a6					wrote       .byte   ?   ; Number of bytes actually read
+.00a3					directory
+>00a3					stream      .byte   ?
+>00a4					cookie      .byte   ?
+.00a5					volume
+>00a5					len         .byte   ?   ; Length of volname (in buf)
+>00a6					flags       .byte   ?   ; block size, text encoding
+.00a5					file
+>00a5					len         .byte   ?
+>00a6					flags       .byte   ?   ; block scale, text encoding, approx size
+.00a5					free
+>00a5					flags       .byte   ?   ; block scale, text encoding, approx size
+.00a3					timer
+>00a3					value       .byte   ?
+>00a4					cookie      .byte   ?
+>2000	f2 56						.byte $f2,$56						; Required bytes for the Kernel to identify
+>2002	04 01						.byte $04,$01						; how big is the program in 8K sections, What slot to map to
+>2004	0b 20						.byte $0b,$20						; the starting address of your program
+>2006	00 00 00 00					.byte $00,$00,$00,$00				; reserved
+>200a	00						.byte $00							; terminating byte
+.200b					SC:
+.200b	64 01		stz $01				stz MMU_IO_CTRL						; should do this on every program
+.200d	a9 a0		lda #$a0	        lda #<event
+.200f	85 f0		sta $f0		        sta kernel.args.events
+.2011	a9 00		lda #$00	        lda #>event
+.2013	85 f1		sta $f1		        sta kernel.args.events+1
+.2015	a9 24		lda #$24			lda #%00100100						; Graphic, Sprites Engine enabled  			|xx|GM|SP|TL|BM|GR|OV|TX|
+.2017	8d 00 d0	sta $d000			sta VKY_MSTR_CTRL_0					;                  		                    | 0| 0| 1| 0| 0| 1| 0| 0|
+.201a	a9 00		lda #$00			lda #%00000000						; Text mode options for the overlay 		|xx|xx|FS|FO|MS|2Y|2X|70|
+.201c	8d 01 d0	sta $d001			sta VKY_MSTR_CTRL_1					; 320 x 240, 60 Hz, dbl X & Y				| 0| 0| 0| 0| 0| 0| 0| 0|
+.201f	9c 04 d0	stz $d004			stz VKY_BRDR_CTRL					; No Border
+.2022	a9 00		lda #$00			lda #$00							; Set the background color
+.2024	8d 0f d0	sta $d00f			sta VKY_BKG_COL_R
+.2027	a9 00		lda #$00			lda #$00
+.2029	8d 0e d0	sta $d00e			sta VKY_BKG_COL_G
+.202c	a9 00		lda #$00			lda #$00
+.202e	8d 0d d0	sta $d00d			sta VKY_BKG_COL_B
+.2031	a9 03		lda #$03			lda #<sprite1
+.2033	8d 81 23	sta $2381			sta spriteLoc
+.2036	a9 24		lda #$24			lda #>sprite1
+.2038	8d 82 23	sta $2382			sta spriteLoc+1
+.203b	a2 00		ldx #$00			ldx #$00
+.203d					spriteLoop:
+.203d	8a		txa				txa
+.203e	0a		asl a				asl
+.203f	0a		asl a				asl
+.2040	0a		asl a				asl
+.2041	a8		tay				tay
+.2042	a9 61		lda #$61			lda #%01100001			; 8x8 sprite, layer 0, lut 0, enable on
+.2044	99 00 d9	sta $d900,y			sta VKY_SP0,y
+.2047	bd 78 22	lda $2278,x			lda ballXLO,x
+.204a	99 04 d9	sta $d904,y			sta VKY_SP0+SP_POS_X_L,Y
+.204d	a9 00		lda #$00			lda #$00
+.204f	99 05 d9	sta $d905,y			sta VKY_SP0+SP_POS_X_H,y
+.2052	bd a8 22	lda $22a8,x			lda ballYLO,X
+.2055	99 06 d9	sta $d906,y			sta VKY_SP0+SP_POS_Y_L,Y
+.2058	bd c0 22	lda $22c0,x			lda ballYHI,X
+.205b	99 07 d9	sta $d907,y			sta VKY_SP0+SP_POS_Y_H,Y
+.205e	ad 81 23	lda $2381			lda spriteLoc
+.2061	99 01 d9	sta $d901,y			sta VKY_SP0+SP_AD_L,y
+.2064	ad 82 23	lda $2382			lda spriteLoc+1
+.2067	99 02 d9	sta $d902,y			sta VKY_SP0+SP_AD_M,y
+.206a	a9 00		lda #$00			lda #$00
+.206c	99 03 d9	sta $d903,y			sta VKY_SP0+SP_AD_H,y
+.206f	18		clc				clc
+.2070	ad 81 23	lda $2381			lda spriteLoc
+.2073	69 40		adc #$40			adc #64
+.2075	8d 81 23	sta $2381			sta spriteLoc
+.2078	ad 82 23	lda $2382			lda spriteLoc+1
+.207b	69 00		adc #$00			adc #$00
+.207d	8d 82 23	sta $2382			sta spriteLoc+1
+.2080	e8		inx				inx
+.2081	e0 18		cpx #$18			cpx #24
+.2083	d0 b8		bne $203d			bne spriteLoop
+.2085	a9 01		lda #$01			lda #$01							; Change I/O control to page 1
+.2087	85 01		sta $01				sta MMU_IO_CTRL
+.2089	a9 83		lda #$83			lda #<CLUT0							; Set source pointer to CLUT for color information
+.208b	85 80		sta $80				sta ptr_src
+.208d	a9 23		lda #$23			lda #>CLUT0
+.208f	85 81		sta $81				sta ptr_src+1
+.2091	a9 00		lda #$00			lda #<VKY_GR_CLUT_0					; Set destination pointer to Graphics CLUT 0
+.2093	85 82		sta $82				sta ptr_dst
+.2095	a9 d0		lda #$d0			lda #>VKY_GR_CLUT_0
+.2097	85 83		sta $83				sta ptr_dst+1
+.2099	a2 00		ldx #$00			ldx #$00							; X is the number of colors to copy, check for 154
+.209b	a0 20		ldy #$20			ldy #32
+.209d					makeClut:
+.209d	8c 80 23	sty $2380			sty totalColors
+.20a0					color_loop:
+.20a0	a0 00		ldy #$00			ldy #$00							; Y points to the color component (Blue Red Green Alpha)
+.20a2					comp_loop:
+.20a2	b1 80		lda ($80),y			lda (ptr_src),y						; Read byte from our color table
+.20a4	91 82		sta ($82),y			sta (ptr_dst),y						; write byte to the Graphic CLUT
+.20a6	c8		iny				iny
+.20a7	c0 04		cpy #$04			cpy #$04							; Do 4 bytes for one color + Alpha
+.20a9	d0 f7		bne $20a2			bne comp_loop
+.20ab	e8		inx				inx
+.20ac	ec 80 23	cpx $2380			cpx totalColors						; Loop for all colors of the CLUT
+.20af	f0 1d		beq $20ce			beq done_lut
+.20b1	18		clc				clc									; Move the source pointer to the next Color
+.20b2	a5 80		lda $80				lda ptr_src
+.20b4	69 04		adc #$04			adc #$04
+.20b6	85 80		sta $80				sta ptr_src
+.20b8	a5 81		lda $81				lda ptr_src+1
+.20ba	69 00		adc #$00			adc #$00
+.20bc	85 81		sta $81				sta ptr_src+1
+.20be	18		clc				clc									; Move the destination pointer to the next Color
+.20bf	a5 82		lda $82				lda ptr_dst
+.20c1	69 04		adc #$04			adc #$04
+.20c3	85 82		sta $82				sta ptr_dst
+.20c5	a5 83		lda $83				lda ptr_dst+1
+.20c7	69 00		adc #$00			adc #$00
+.20c9	85 83		sta $83				sta ptr_dst+1
+.20cb	4c a0 20	jmp $20a0			jmp color_loop						; and start copying the next color
+.20ce					done_lut:
+.20ce	64 01		stz $01				stz MMU_IO_CTRL
+.20d0	a9 c0		lda #$c0			lda #$c0
+.20d2	8d a1 dd	sta $dda1			sta MIDI_COM
+.20d5	a9 0c		lda #$0c			lda #12
+.20d7	8d a1 dd	sta $dda1			sta MIDI_COM
+.20da	a9 00		lda #$00			lda #kernel.args.timer.FRAMES		; set the Timer to Frames
+.20dc	09 80		ora #$80			ora #kernel.args.timer.QUERY		; and query what frame we're on
+.20de	85 f3		sta $f3				sta kernel.args.timer.units			; store in units parameter
+.20e0	20 f0 ff	jsr $fff0			jsr kernel.Clock.SetTimer			; jsr to Kernel Routine
+.20e3	b0 04		bcs $20e9			bcs skipSet							; If Carry set, ignore
+.20e5	69 01		adc #$01			adc #$01							; if not add 1 to Accumulator for next frame
+.20e7	85 d0		sta $d0				sta $d0
+.20e9					skipSet:
+.20e9	20 20 22	jsr $2220			jsr SetTimer						; Let's get the kernel set up for the timer
+.20ec					loop:
+.20ec	20 f2 20	jsr $20f2			jsr handle_events
+.20ef	4c ec 20	jmp $20ec			jmp loop
+.20f2					handle_events:
+.20f2	a5 f2		lda $f2				lda kernel.args.events.pending		; Peek at the queue to see if anything is pending
+.20f4	10 0b		bpl $2101			bpl done_handle_events				; Nothing to do
+.20f6	20 00 ff	jsr $ff00			jsr kernel.NextEvent				; Get the next event.
+.20f9	b0 06		bcs $2101			bcs done_handle_events				; If Carry is set, skip the handler
+.20fb	20 02 21	jsr $2102			jsr dispatch						; Handle the event
+.20fe	4c f2 20	jmp $20f2			jmp handle_events					; go and check for another event
+.2101					done_handle_events:
+.2101	60		rts				rts
+.2102					dispatch:
+.2102	a5 a0		lda $a0				lda event.type						; get the event type from Kernel
+.2104	c9 52		cmp #$52			cmp #kernel.event.timer.EXPIRED		; is the event timer.EXPIRED?
+.2106	f0 01		beq $2109			beq UpdateScreen					; run the screen update
+.2108	60		rts				rts
+.2109					UpdateScreen:
+.2109	20 20 22	jsr $2220			jsr SetTimer						; reset timer for next SOF
+.210c	20 10 21	jsr $2110			jsr moveBalls						; move the balls
+.210f	60		rts				rts
+.2110					moveBalls:
+.2110	a2 00		ldx #$00			ldx #$00							; set X to zero to loop 24 balls
+.2112					mbLoop:
+.2112	8a		txa				txa									; transfer x to A
+.2113	0a		asl a				asl									; and multiply by 8
+.2114	0a		asl a				asl 								;		sprite control is 8 bytes large
+.2115	0a		asl a				asl									;       this sets y at the start of each sprite
+.2116	a8		tay				tay									; 		and store in y
+.2117	bd 30 22	lda $2230,x			lda ballDir,x 						; Get the ball direction 1 for right FF for left
+.211a	c9 ff		cmp #$ff			cmp #$ff							; check if we're going left
+.211c	f0 36		beq $2154			beq goBack							; if yest, go to left routine
+.211e					goForward:
+.211e	18		clc				clc									; go right routine
+.211f	bd 60 22	lda $2260,x			lda ballXFR,x						; we're going to add the speed to the X paramter
+.2122	7d 48 22	adc $2248,x			adc ballSpd,x 						; using a single byte fixed point fraction
+.2125	9d 60 22	sta $2260,x			sta ballXFR,x
+.2128	bd 78 22	lda $2278,x			lda ballXLO,x
+.212b	69 00		adc #$00			adc #$00
+.212d	9d 78 22	sta $2278,x			sta ballXLO,x
+.2130	bd 90 22	lda $2290,x			lda ballXHI,x
+.2133	69 00		adc #$00			adc #$00
+.2135	9d 90 22	sta $2290,x			sta ballxHI,x
+.2138	bd 78 22	lda $2278,x			lda ballXLO,x 						; see if we hit the right side of the screen
+.213b	c9 59		cmp #$59			cmp #$59
+.213d	d0 4d		bne $218c			bne placeBall						; no, let's set the sprite on the screen
+.213f	bd 90 22	lda $2290,x			lda ballxHI,x 						; need to check HI byte as well
+.2142	f0 48		beq $218c			beq placeBall						; no, place sprite on screen
+.2144	a9 ff		lda #$ff			lda #$ff							; yes, change the direction flag to $ff
+.2146	9d 30 22	sta $2230,x			sta ballDir,x
+.2149	a9 00		lda #$00			lda #$00							; set the fraction to zero
+.214b	9d 60 22	sta $2260,x			sta ballXFR,x
+.214e	20 a7 21	jsr $21a7			jsr makeMusic						; hit the note on the SAM chip
+.2151	20 b8 21	jsr $21b8			jsr makeColor						; fill the ball with the correct color
+.2154					goBack:
+.2154	38		sec				sec 								; go left direction
+.2155	bd 60 22	lda $2260,x			lda ballXFR,x						; subtract the ball speed from the x potition
+.2158	fd 48 22	sbc $2248,x			sbc ballSpd,x
+.215b	9d 60 22	sta $2260,x			sta ballXFR,x
+.215e	bd 78 22	lda $2278,x			lda ballXLO,x
+.2161	e9 00		sbc #$00			sbc #$00
+.2163	9d 78 22	sta $2278,x			sta ballXLO,x
+.2166	bd 90 22	lda $2290,x			lda ballXHI,x
+.2169	e9 00		sbc #$00			sbc #$00
+.216b	9d 90 22	sta $2290,x			sta ballxHI,x
+.216e	bd 78 22	lda $2278,x			lda ballXLO,x 						; check if we hit the left side of the screen
+.2171	c9 1f		cmp #$1f			cmp #$1f
+.2173	d0 17		bne $218c			bne placeBall						; no, place the sprite
+.2175	bd 90 22	lda $2290,x			lda ballxHI,x 						; we need to check the hi byte too
+.2178	d0 12		bne $218c			bne placeBall						; no, place the sprite
+.217a	a9 01		lda #$01			lda #$01							; change the ball direction to right
+.217c	9d 30 22	sta $2230,x			sta ballDir,x
+.217f	a9 00		lda #$00			lda #$00							; clear the x fraction byte
+.2181	9d 60 22	sta $2260,x			sta ballXFR,x
+.2184	20 a7 21	jsr $21a7			jsr makeMusic						; hit the note on the SAM chip
+.2187	20 b8 21	jsr $21b8			jsr makeColor						; fill the ball with the correct color
+.218a	80 92		bra $211e			bra goForward						; and run the go forward routine
+.218c					placeBall:
+.218c	bd 78 22	lda $2278,x			lda ballXLO,X						; set the sprite position parameter
+.218f	99 04 d9	sta $d904,y			sta VKY_SP0+SP_POS_X_L,Y
+.2192	bd 90 22	lda $2290,x			lda ballxHI,X
+.2195	99 05 d9	sta $d905,y			sta VKY_SP0+SP_POS_X_H,y
+.2198	20 cb 21	jsr $21cb			jsr dropColor						; reduce the color intesity as it travels away from the edge
+.219b	20 f9 21	jsr $21f9			jsr assignColor						; and assign the color to the CLUT
+.219e	e8		inx				inx									; go to next ball in sequence
+.219f	e0 18		cpx #$18			cpx #24								; have we gone through all 24 balls
+.21a1	f0 03		beq $21a6			beq doneBallLoop					; yes skip the jmp command to top
+.21a3	4c 12 21	jmp $2112			jmp mbLoop
+.21a6					doneBallLoop:
+.21a6	60		rts				rts
+.21a7					makeMusic:
+.21a7	a9 90		lda #$90			lda #$90							; set channel 0
+.21a9	8d a1 dd	sta $dda1			sta MIDI_COM
+.21ac	bd d8 22	lda $22d8,x			lda ballNote,X						; send note value based on what ball hit the edge
+.21af	8d a1 dd	sta $dda1			sta MIDI_COM
+.21b2	a9 7f		lda #$7f			lda #$7f							; volume is full velocity
+.21b4	8d a1 dd	sta $dda1			sta MIDI_COM
+.21b7	60		rts				rts
+.21b8					makeColor:
+.21b8	bd 38 23	lda $2338,x			lda colorG,X						; get the reference color
+.21bb	9d f0 22	sta $22f0,x			sta ballG,X							; and store it in the ball
+.21be	bd 50 23	lda $2350,x			lda colorR,X						; for all three colors
+.21c1	9d 08 23	sta $2308,x			sta ballR,X
+.21c4	bd 68 23	lda $2368,x			lda colorB,X
+.21c7	9d 20 23	sta $2320,x			sta ballB,X
+.21ca	60		rts				rts
+.21cb					dropColor:
+.21cb	de f0 22	dec $22f0,x			dec ballG,X							; each cycle reduce the color value by one
+.21ce	de 08 23	dec $2308,x			dec ballR,x
+.21d1	de 20 23	dec $2320,x			dec ballB,x
+.21d4	bd f0 22	lda $22f0,x			lda ballG,X							; check if we've gone too far
+.21d7	c9 ff		cmp #$ff			cmp #$ff							; and reset to zero
+.21d9	d0 05		bne $21e0			bne checkRed
+.21db	a9 00		lda #$00			lda #$00
+.21dd	9d f0 22	sta $22f0,x			sta ballG,x
+.21e0					checkRed:
+.21e0	bd 08 23	lda $2308,x			lda ballR,x
+.21e3	c9 ff		cmp #$ff			cmp #$ff
+.21e5	d0 05		bne $21ec			bne checkBlue
+.21e7	a9 00		lda #$00			lda #$00
+.21e9	9d 08 23	sta $2308,x			sta ballR,x
+.21ec					checkBlue:
+.21ec	bd 20 23	lda $2320,x			lda ballB,x
+.21ef	c9 ff		cmp #$ff			cmp #$ff
+.21f1	d0 05		bne $21f8			bne colorDone
+.21f3	a9 00		lda #$00			lda #$00
+.21f5	9d 20 23	sta $2320,x			sta ballB,x
+.21f8					colorDone:
+.21f8	60		rts				rts
+.21f9					assignColor:
+.21f9	a9 01		lda #$01			lda #$01							; Change I/O control to page 1
+.21fb	85 01		sta $01				sta MMU_IO_CTRL
+.21fd	8a		txa				txa									; grab which ball we have
+.21fe	18		clc				clc
+.21ff	69 02		adc #$02			adc #$02							; and add two for the first color to first ball
+.2201	0a		asl a				asl									; then multiply by 4 to get to the right
+.2202	0a		asl a				asl									; location for the RGBA bytes for each color
+.2203	a8		tay				tay									; and transfer to Y for indirect indexing
+.2204	a9 00		lda #$00			lda #<VKY_GR_CLUT_0					; Set destination pointer to Graphics CLUT 0
+.2206	85 82		sta $82				sta ptr_dst
+.2208	a9 d0		lda #$d0			lda #>VKY_GR_CLUT_0
+.220a	85 83		sta $83				sta ptr_dst+1
+.220c	bd f0 22	lda $22f0,x			lda ballG,x 						; get the ball color
+.220f	91 82		sta ($82),y			sta (ptr_dst),y						; and store it in the CLUT
+.2211	c8		iny				iny									; incrment y for next color component
+.2212	bd 08 23	lda $2308,x			lda ballR,x 						; and repeat
+.2215	91 82		sta ($82),y			sta (ptr_dst),y
+.2217	c8		iny				iny
+.2218	bd 20 23	lda $2320,x			lda ballB,x
+.221b	91 82		sta ($82),y			sta (ptr_dst),y
+.221d	64 01		stz $01				stz MMU_IO_CTRL						; reset mmu IO to zero
+.221f	60		rts				rts
+.2220					SetTimer:
+.2220	e6 d0		inc $d0				inc $d0
+.2222	a5 d0		lda $d0				lda $d0
+.2224	85 f4		sta $f4				sta kernel.args.timer.absolute		; store in timer.absolute paramter
+.2226	85 f5		sta $f5				sta kernel.args.timer.cookie		; saved as a cookie to the kernel (same as frame number)
+.2228	a9 00		lda #$00			lda #kernel.args.timer.FRAMES		; set the Timer to Frames
+.222a	85 f3		sta $f3				sta kernel.args.timer.units			; store in units parameter
+.222c	20 f0 ff	jsr $fff0			jsr kernel.Clock.SetTimer			; jsr to Kernel routine to set timer
+.222f	60		rts				rts
+>2230	01 01 01 01 01 01 01 01		ballDir:	.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
+>2238	01 01 01 01 01 01 01 01 01 01 01 01 01 01 01 01
+>2248	f8 f0 e8 e0 d8 d0 c8 c0		ballSpd:	.byte $f8,$f0,$e8,$e0,$d8,$d0,$c8,$c0,$b8,$b0,$a8,$a0,$98,$90,$88,$80,$78,$70,$68,$60,$58,$50,$48,$40
+>2250	b8 b0 a8 a0 98 90 88 80 78 70 68 60 58 50 48 40
+>2260	00 00 00 00 00 00 00 00		ballXFR:	.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+>2268	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>2278	20 20 20 20 20 20 20 20		ballXLO:	.byte $20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20
+>2280	20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20
+>2290	00 00 00 00 00 00 00 00		ballXHI:	.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+>2298	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>22a8	21 2b 35 3f 49 53 5d 67		ballYLO:	.byte $21,$2b,$35,$3f,$49,$53,$5d,$67,$71,$7b,$85,$8f,$99,$a3,$ad,$b7,$c1,$cb,$d5,$df,$e9,$f3,$fd,$07
+>22b0	71 7b 85 8f 99 a3 ad b7 c1 cb d5 df e9 f3 fd 07
+>22c0	00 00 00 00 00 00 00 00		ballYHI:	.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01
+>22c8	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01
+>22d8	3c 3b 3a 39 38 37 36 35		ballNote:	.byte 60, 59, 58, 57, 56, 55, 54, 53, 52 ,51 ,50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37
+>22e0	34 33 32 31 30 2f 2e 2d 2c 2b 2a 29 28 27 26 25
+>22f0	00 00 00 00 00 00 00 00		ballG:		.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+>22f8	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>2308	00 00 00 00 00 00 00 00		ballR:		.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+>2310	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>2320	00 00 00 00 00 00 00 00		ballB:		.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+>2328	00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+>2338	00 00 00 00 00 00 3f 7f		colorG:		.byte $00,$00,        $00,       $00,     $00, $00,   $3F,   $7F,   $BF,    $FF, $FF,    $FF,     $FF,$FF,      $FF,   $FF,  $FF,   $BF,       $7F, $3F,   $00,  $00,    $00,     $00
+>2340	bf ff ff ff ff ff ff ff ff bf 7f 3f 00 00 00 00
+>2350	ff bf 7f 3f 00 00 00 00		colorR:		.byte $FF,$BF,        $7F,       $3F,     $00, $00,   $00,   $00,   $00,    $00, $00,    $00,     $00,$3F,      $7F,   $BF,  $FF,   $FF,       $FF, $FF,   $FF,  $FF,    $FF,     $FF
+>2358	00 00 00 00 00 3f 7f bf ff ff ff ff ff ff ff ff
+>2368	ff ff ff ff ff bf bf bf		colorB:		.byte $FF,$FF,        $FF,       $FF,     $FF, $BF,   $BF,   $BF,   $BF,    $BF, $7F,    $7F,     $7F,$7F,      $3F,   $3F,  $3F,   $3F,       $00, $00,   $00,  $00,    $00,     $00
+>2370	bf bf 7f 7f 7f 7f 3f 3f 3f 3f 00 00 00 00 00 00
+>2380	20				totalColors:	.byte 32
+>2381	00 00				spriteLoc:		.word $0000
+
+;******  Processing file: ball.s
+
+.2383					CLUT0:
+>2383	00 00 00 ff				.byte	$0,$0,$0,$ff
+>2387	ff ff ff ff				.byte	$ff,$ff,$ff,$ff
+>238b	3c 28 45 ff				.byte	$3c,$28,$45,$ff
+>238f	31 39 66 ff				.byte	$31,$39,$66,$ff
+>2393	3b 56 8f ff				.byte	$3b,$56,$8f,$ff
+>2397	26 71 df ff				.byte	$26,$71,$df,$ff
+>239b	66 a0 d9 ff				.byte	$66,$a0,$d9,$ff
+>239f	9a c3 ee ff				.byte	$9a,$c3,$ee,$ff
+>23a3	36 f2 fb ff				.byte	$36,$f2,$fb,$ff
+>23a7	50 e5 99 ff				.byte	$50,$e5,$99,$ff
+>23ab	30 be 6a ff				.byte	$30,$be,$6a,$ff
+>23af	6e 94 37 ff				.byte	$6e,$94,$37,$ff
+>23b3	2f 69 4b ff				.byte	$2f,$69,$4b,$ff
+>23b7	24 4b 52 ff				.byte	$24,$4b,$52,$ff
+>23bb	39 3c 32 ff				.byte	$39,$3c,$32,$ff
+>23bf	74 3f 3f ff				.byte	$74,$3f,$3f,$ff
+>23c3	82 60 30 ff				.byte	$82,$60,$30,$ff
+>23c7	e1 6e 5b ff				.byte	$e1,$6e,$5b,$ff
+>23cb	ff 9b 63 ff				.byte	$ff,$9b,$63,$ff
+>23cf	e4 cd 5f ff				.byte	$e4,$cd,$5f,$ff
+>23d3	fc db cb ff				.byte	$fc,$db,$cb,$ff
+>23d7	ba 7b d7 ff				.byte	$ba,$7b,$d7,$ff
+>23db	b7 ad 9b ff				.byte	$b7,$ad,$9b,$ff
+>23df	87 7e 84 ff				.byte	$87,$7e,$84,$ff
+>23e3	6a 6a 69 ff				.byte	$6a,$6a,$69,$ff
+>23e7	52 56 59 ff				.byte	$52,$56,$59,$ff
+>23eb	8a 42 76 ff				.byte	$8a,$42,$76,$ff
+>23ef	32 32 ac ff				.byte	$32,$32,$ac,$ff
+>23f3	63 57 d9 ff				.byte	$63,$57,$d9,$ff
+>23f7	ba 7b d7 ff				.byte	$ba,$7b,$d7,$ff
+>23fb	4a 97 8f ff				.byte	$4a,$97,$8f,$ff
+>23ff	30 6f 8a ff				.byte	$30,$6f,$8a,$ff
+.2403					sprite1:
+>2403	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>240b	00 01 02 02 02 02 01 00			.byte	$0,$1,$2,$2,$2,$2,$1,$0
+>2413	01 02 02 02 02 02 02 01			.byte	$1,$2,$2,$2,$2,$2,$2,$1
+>241b	01 02 02 02 02 02 02 01			.byte	$1,$2,$2,$2,$2,$2,$2,$1
+>2423	01 02 02 02 02 02 02 01			.byte	$1,$2,$2,$2,$2,$2,$2,$1
+>242b	01 02 02 02 02 02 02 01			.byte	$1,$2,$2,$2,$2,$2,$2,$1
+>2433	00 01 02 02 02 02 01 00			.byte	$0,$1,$2,$2,$2,$2,$1,$0
+>243b	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2443					sprite2:
+>2443	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>244b	00 01 03 03 03 03 01 00			.byte	$0,$1,$3,$3,$3,$3,$1,$0
+>2453	01 03 03 03 03 03 03 01			.byte	$1,$3,$3,$3,$3,$3,$3,$1
+>245b	01 03 03 03 03 03 03 01			.byte	$1,$3,$3,$3,$3,$3,$3,$1
+>2463	01 03 03 03 03 03 03 01			.byte	$1,$3,$3,$3,$3,$3,$3,$1
+>246b	01 03 03 03 03 03 03 01			.byte	$1,$3,$3,$3,$3,$3,$3,$1
+>2473	00 01 03 03 03 03 01 00			.byte	$0,$1,$3,$3,$3,$3,$1,$0
+>247b	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2483					sprite3:
+>2483	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>248b	00 01 04 04 04 04 01 00			.byte	$0,$1,$4,$4,$4,$4,$1,$0
+>2493	01 04 04 04 04 04 04 01			.byte	$1,$4,$4,$4,$4,$4,$4,$1
+>249b	01 04 04 04 04 04 04 01			.byte	$1,$4,$4,$4,$4,$4,$4,$1
+>24a3	01 04 04 04 04 04 04 01			.byte	$1,$4,$4,$4,$4,$4,$4,$1
+>24ab	01 04 04 04 04 04 04 01			.byte	$1,$4,$4,$4,$4,$4,$4,$1
+>24b3	00 01 04 04 04 04 01 00			.byte	$0,$1,$4,$4,$4,$4,$1,$0
+>24bb	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.24c3					sprite4:
+>24c3	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>24cb	00 01 05 05 05 05 01 00			.byte	$0,$1,$5,$5,$5,$5,$1,$0
+>24d3	01 05 05 05 05 05 05 01			.byte	$1,$5,$5,$5,$5,$5,$5,$1
+>24db	01 05 05 05 05 05 05 01			.byte	$1,$5,$5,$5,$5,$5,$5,$1
+>24e3	01 05 05 05 05 05 05 01			.byte	$1,$5,$5,$5,$5,$5,$5,$1
+>24eb	01 05 05 05 05 05 05 01			.byte	$1,$5,$5,$5,$5,$5,$5,$1
+>24f3	00 01 05 05 05 05 01 00			.byte	$0,$1,$5,$5,$5,$5,$1,$0
+>24fb	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2503					sprite5:
+>2503	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>250b	00 01 06 06 06 06 01 00			.byte	$0,$1,$6,$6,$6,$6,$1,$0
+>2513	01 06 06 06 06 06 06 01			.byte	$1,$6,$6,$6,$6,$6,$6,$1
+>251b	01 06 06 06 06 06 06 01			.byte	$1,$6,$6,$6,$6,$6,$6,$1
+>2523	01 06 06 06 06 06 06 01			.byte	$1,$6,$6,$6,$6,$6,$6,$1
+>252b	01 06 06 06 06 06 06 01			.byte	$1,$6,$6,$6,$6,$6,$6,$1
+>2533	00 01 06 06 06 06 01 00			.byte	$0,$1,$6,$6,$6,$6,$1,$0
+>253b	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2543					sprite6:
+>2543	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>254b	00 01 07 07 07 07 01 00			.byte	$0,$1,$7,$7,$7,$7,$1,$0
+>2553	01 07 07 07 07 07 07 01			.byte	$1,$7,$7,$7,$7,$7,$7,$1
+>255b	01 07 07 07 07 07 07 01			.byte	$1,$7,$7,$7,$7,$7,$7,$1
+>2563	01 07 07 07 07 07 07 01			.byte	$1,$7,$7,$7,$7,$7,$7,$1
+>256b	01 07 07 07 07 07 07 01			.byte	$1,$7,$7,$7,$7,$7,$7,$1
+>2573	00 01 07 07 07 07 01 00			.byte	$0,$1,$7,$7,$7,$7,$1,$0
+>257b	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2583					sprite7:
+>2583	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>258b	00 01 08 08 08 08 01 00			.byte	$0,$1,$8,$8,$8,$8,$1,$0
+>2593	01 08 08 08 08 08 08 01			.byte	$1,$8,$8,$8,$8,$8,$8,$1
+>259b	01 08 08 08 08 08 08 01			.byte	$1,$8,$8,$8,$8,$8,$8,$1
+>25a3	01 08 08 08 08 08 08 01			.byte	$1,$8,$8,$8,$8,$8,$8,$1
+>25ab	01 08 08 08 08 08 08 01			.byte	$1,$8,$8,$8,$8,$8,$8,$1
+>25b3	00 01 08 08 08 08 01 00			.byte	$0,$1,$8,$8,$8,$8,$1,$0
+>25bb	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.25c3					sprite8:
+>25c3	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>25cb	00 01 09 09 09 09 01 00			.byte	$0,$1,$9,$9,$9,$9,$1,$0
+>25d3	01 09 09 09 09 09 09 01			.byte	$1,$9,$9,$9,$9,$9,$9,$1
+>25db	01 09 09 09 09 09 09 01			.byte	$1,$9,$9,$9,$9,$9,$9,$1
+>25e3	01 09 09 09 09 09 09 01			.byte	$1,$9,$9,$9,$9,$9,$9,$1
+>25eb	01 09 09 09 09 09 09 01			.byte	$1,$9,$9,$9,$9,$9,$9,$1
+>25f3	00 01 09 09 09 09 01 00			.byte	$0,$1,$9,$9,$9,$9,$1,$0
+>25fb	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2603					sprite9:
+>2603	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>260b	00 01 0a 0a 0a 0a 01 00			.byte	$0,$1,$a,$a,$a,$a,$1,$0
+>2613	01 0a 0a 0a 0a 0a 0a 01			.byte	$1,$a,$a,$a,$a,$a,$a,$1
+>261b	01 0a 0a 0a 0a 0a 0a 01			.byte	$1,$a,$a,$a,$a,$a,$a,$1
+>2623	01 0a 0a 0a 0a 0a 0a 01			.byte	$1,$a,$a,$a,$a,$a,$a,$1
+>262b	01 0a 0a 0a 0a 0a 0a 01			.byte	$1,$a,$a,$a,$a,$a,$a,$1
+>2633	00 01 0a 0a 0a 0a 01 00			.byte	$0,$1,$a,$a,$a,$a,$1,$0
+>263b	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2643					sprite10:
+>2643	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>264b	00 01 0b 0b 0b 0b 01 00			.byte	$0,$1,$b,$b,$b,$b,$1,$0
+>2653	01 0b 0b 0b 0b 0b 0b 01			.byte	$1,$b,$b,$b,$b,$b,$b,$1
+>265b	01 0b 0b 0b 0b 0b 0b 01			.byte	$1,$b,$b,$b,$b,$b,$b,$1
+>2663	01 0b 0b 0b 0b 0b 0b 01			.byte	$1,$b,$b,$b,$b,$b,$b,$1
+>266b	01 0b 0b 0b 0b 0b 0b 01			.byte	$1,$b,$b,$b,$b,$b,$b,$1
+>2673	00 01 0b 0b 0b 0b 01 00			.byte	$0,$1,$b,$b,$b,$b,$1,$0
+>267b	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2683					sprite11:
+>2683	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>268b	00 01 0c 0c 0c 0c 01 00			.byte	$0,$1,$c,$c,$c,$c,$1,$0
+>2693	01 0c 0c 0c 0c 0c 0c 01			.byte	$1,$c,$c,$c,$c,$c,$c,$1
+>269b	01 0c 0c 0c 0c 0c 0c 01			.byte	$1,$c,$c,$c,$c,$c,$c,$1
+>26a3	01 0c 0c 0c 0c 0c 0c 01			.byte	$1,$c,$c,$c,$c,$c,$c,$1
+>26ab	01 0c 0c 0c 0c 0c 0c 01			.byte	$1,$c,$c,$c,$c,$c,$c,$1
+>26b3	00 01 0c 0c 0c 0c 01 00			.byte	$0,$1,$c,$c,$c,$c,$1,$0
+>26bb	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.26c3					sprite12:
+>26c3	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>26cb	00 01 0d 0d 0d 0d 01 00			.byte	$0,$1,$d,$d,$d,$d,$1,$0
+>26d3	01 0d 0d 0d 0d 0d 0d 01			.byte	$1,$d,$d,$d,$d,$d,$d,$1
+>26db	01 0d 0d 0d 0d 0d 0d 01			.byte	$1,$d,$d,$d,$d,$d,$d,$1
+>26e3	01 0d 0d 0d 0d 0d 0d 01			.byte	$1,$d,$d,$d,$d,$d,$d,$1
+>26eb	01 0d 0d 0d 0d 0d 0d 01			.byte	$1,$d,$d,$d,$d,$d,$d,$1
+>26f3	00 01 0d 0d 0d 0d 01 00			.byte	$0,$1,$d,$d,$d,$d,$1,$0
+>26fb	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2703					sprite13:
+>2703	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>270b	00 01 0e 0e 0e 0e 01 00			.byte	$0,$1,$e,$e,$e,$e,$1,$0
+>2713	01 0e 0e 0e 0e 0e 0e 01			.byte	$1,$e,$e,$e,$e,$e,$e,$1
+>271b	01 0e 0e 0e 0e 0e 0e 01			.byte	$1,$e,$e,$e,$e,$e,$e,$1
+>2723	01 0e 0e 0e 0e 0e 0e 01			.byte	$1,$e,$e,$e,$e,$e,$e,$1
+>272b	01 0e 0e 0e 0e 0e 0e 01			.byte	$1,$e,$e,$e,$e,$e,$e,$1
+>2733	00 01 0e 0e 0e 0e 01 00			.byte	$0,$1,$e,$e,$e,$e,$1,$0
+>273b	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2743					sprite14:
+>2743	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>274b	00 01 0f 0f 0f 0f 01 00			.byte	$0,$1,$f,$f,$f,$f,$1,$0
+>2753	01 0f 0f 0f 0f 0f 0f 01			.byte	$1,$f,$f,$f,$f,$f,$f,$1
+>275b	01 0f 0f 0f 0f 0f 0f 01			.byte	$1,$f,$f,$f,$f,$f,$f,$1
+>2763	01 0f 0f 0f 0f 0f 0f 01			.byte	$1,$f,$f,$f,$f,$f,$f,$1
+>276b	01 0f 0f 0f 0f 0f 0f 01			.byte	$1,$f,$f,$f,$f,$f,$f,$1
+>2773	00 01 0f 0f 0f 0f 01 00			.byte	$0,$1,$f,$f,$f,$f,$1,$0
+>277b	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2783					sprite15:
+>2783	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>278b	00 01 10 10 10 10 01 00			.byte	$0,$1,$10,$10,$10,$10,$1,$0
+>2793	01 10 10 10 10 10 10 01			.byte	$1,$10,$10,$10,$10,$10,$10,$1
+>279b	01 10 10 10 10 10 10 01			.byte	$1,$10,$10,$10,$10,$10,$10,$1
+>27a3	01 10 10 10 10 10 10 01			.byte	$1,$10,$10,$10,$10,$10,$10,$1
+>27ab	01 10 10 10 10 10 10 01			.byte	$1,$10,$10,$10,$10,$10,$10,$1
+>27b3	00 01 10 10 10 10 01 00			.byte	$0,$1,$10,$10,$10,$10,$1,$0
+>27bb	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.27c3					sprite16:
+>27c3	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>27cb	00 01 11 11 11 11 01 00			.byte	$0,$1,$11,$11,$11,$11,$1,$0
+>27d3	01 11 11 11 11 11 11 01			.byte	$1,$11,$11,$11,$11,$11,$11,$1
+>27db	01 11 11 11 11 11 11 01			.byte	$1,$11,$11,$11,$11,$11,$11,$1
+>27e3	01 11 11 11 11 11 11 01			.byte	$1,$11,$11,$11,$11,$11,$11,$1
+>27eb	01 11 11 11 11 11 11 01			.byte	$1,$11,$11,$11,$11,$11,$11,$1
+>27f3	00 01 11 11 11 11 01 00			.byte	$0,$1,$11,$11,$11,$11,$1,$0
+>27fb	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2803					sprite17:
+>2803	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>280b	00 01 12 12 12 12 01 00			.byte	$0,$1,$12,$12,$12,$12,$1,$0
+>2813	01 12 12 12 12 12 12 01			.byte	$1,$12,$12,$12,$12,$12,$12,$1
+>281b	01 12 12 12 12 12 12 01			.byte	$1,$12,$12,$12,$12,$12,$12,$1
+>2823	01 12 12 12 12 12 12 01			.byte	$1,$12,$12,$12,$12,$12,$12,$1
+>282b	01 12 12 12 12 12 12 01			.byte	$1,$12,$12,$12,$12,$12,$12,$1
+>2833	00 01 12 12 12 12 01 00			.byte	$0,$1,$12,$12,$12,$12,$1,$0
+>283b	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2843					sprite18:
+>2843	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>284b	00 01 13 13 13 13 01 00			.byte	$0,$1,$13,$13,$13,$13,$1,$0
+>2853	01 13 13 13 13 13 13 01			.byte	$1,$13,$13,$13,$13,$13,$13,$1
+>285b	01 13 13 13 13 13 13 01			.byte	$1,$13,$13,$13,$13,$13,$13,$1
+>2863	01 13 13 13 13 13 13 01			.byte	$1,$13,$13,$13,$13,$13,$13,$1
+>286b	01 13 13 13 13 13 13 01			.byte	$1,$13,$13,$13,$13,$13,$13,$1
+>2873	00 01 13 13 13 13 01 00			.byte	$0,$1,$13,$13,$13,$13,$1,$0
+>287b	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2883					sprite19:
+>2883	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>288b	00 01 14 14 14 14 01 00			.byte	$0,$1,$14,$14,$14,$14,$1,$0
+>2893	01 14 14 14 14 14 14 01			.byte	$1,$14,$14,$14,$14,$14,$14,$1
+>289b	01 14 14 14 14 14 14 01			.byte	$1,$14,$14,$14,$14,$14,$14,$1
+>28a3	01 14 14 14 14 14 14 01			.byte	$1,$14,$14,$14,$14,$14,$14,$1
+>28ab	01 14 14 14 14 14 14 01			.byte	$1,$14,$14,$14,$14,$14,$14,$1
+>28b3	00 01 14 14 14 14 01 00			.byte	$0,$1,$14,$14,$14,$14,$1,$0
+>28bb	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.28c3					sprite20:
+>28c3	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>28cb	00 01 15 15 15 15 01 00			.byte	$0,$1,$15,$15,$15,$15,$1,$0
+>28d3	01 15 15 15 15 15 15 01			.byte	$1,$15,$15,$15,$15,$15,$15,$1
+>28db	01 15 15 15 15 15 15 01			.byte	$1,$15,$15,$15,$15,$15,$15,$1
+>28e3	01 15 15 15 15 15 15 01			.byte	$1,$15,$15,$15,$15,$15,$15,$1
+>28eb	01 15 15 15 15 15 15 01			.byte	$1,$15,$15,$15,$15,$15,$15,$1
+>28f3	00 01 15 15 15 15 01 00			.byte	$0,$1,$15,$15,$15,$15,$1,$0
+>28fb	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2903					sprite21:
+>2903	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>290b	00 01 16 16 16 16 01 00			.byte	$0,$1,$16,$16,$16,$16,$1,$0
+>2913	01 16 16 16 16 16 16 01			.byte	$1,$16,$16,$16,$16,$16,$16,$1
+>291b	01 16 16 16 16 16 16 01			.byte	$1,$16,$16,$16,$16,$16,$16,$1
+>2923	01 16 16 16 16 16 16 01			.byte	$1,$16,$16,$16,$16,$16,$16,$1
+>292b	01 16 16 16 16 16 16 01			.byte	$1,$16,$16,$16,$16,$16,$16,$1
+>2933	00 01 16 16 16 16 01 00			.byte	$0,$1,$16,$16,$16,$16,$1,$0
+>293b	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2943					sprite22:
+>2943	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>294b	00 01 17 17 17 17 01 00			.byte	$0,$1,$17,$17,$17,$17,$1,$0
+>2953	01 17 17 17 17 17 17 01			.byte	$1,$17,$17,$17,$17,$17,$17,$1
+>295b	01 17 17 17 17 17 17 01			.byte	$1,$17,$17,$17,$17,$17,$17,$1
+>2963	01 17 17 17 17 17 17 01			.byte	$1,$17,$17,$17,$17,$17,$17,$1
+>296b	01 17 17 17 17 17 17 01			.byte	$1,$17,$17,$17,$17,$17,$17,$1
+>2973	00 01 17 17 17 17 01 00			.byte	$0,$1,$17,$17,$17,$17,$1,$0
+>297b	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.2983					sprite23:
+>2983	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>298b	00 01 18 18 18 18 01 00			.byte	$0,$1,$18,$18,$18,$18,$1,$0
+>2993	01 18 18 18 18 18 18 01			.byte	$1,$18,$18,$18,$18,$18,$18,$1
+>299b	01 18 18 18 18 18 18 01			.byte	$1,$18,$18,$18,$18,$18,$18,$1
+>29a3	01 18 18 18 18 18 18 01			.byte	$1,$18,$18,$18,$18,$18,$18,$1
+>29ab	01 18 18 18 18 18 18 01			.byte	$1,$18,$18,$18,$18,$18,$18,$1
+>29b3	00 01 18 18 18 18 01 00			.byte	$0,$1,$18,$18,$18,$18,$1,$0
+>29bb	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+.29c3					sprite24:
+>29c3	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+>29cb	00 01 19 19 19 19 01 00			.byte	$0,$1,$19,$19,$19,$19,$1,$0
+>29d3	01 19 19 19 19 19 19 01			.byte	$1,$19,$19,$19,$19,$19,$19,$1
+>29db	01 19 19 19 19 19 19 01			.byte	$1,$19,$19,$19,$19,$19,$19,$1
+>29e3	01 19 19 19 19 19 19 01			.byte	$1,$19,$19,$19,$19,$19,$19,$1
+>29eb	01 19 19 19 19 19 19 01			.byte	$1,$19,$19,$19,$19,$19,$19,$1
+>29f3	00 01 19 19 19 19 01 00			.byte	$0,$1,$19,$19,$19,$19,$1,$0
+>29fb	00 00 01 01 01 01 00 00			.byte	$0,$0,$1,$1,$1,$1,$0,$0
+
+;******  Return to file: pendulum.asm
+
+
+;******  End of listing
