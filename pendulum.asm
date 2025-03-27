@@ -167,7 +167,7 @@ done_lut:
 
 		lda #$c0							; set the instrument for channel 0
 		sta MIDI_COM
-		lda #12								; this is the instrument number
+		lda #11								; this is the instrument number
 		sta MIDI_COM
 ; ************************************************************************************************************************************
 ; set timer for SOF
@@ -209,7 +209,6 @@ dispatch:
 UpdateScreen:
 		jsr SetTimer						; reset timer for next SOF
 		jsr moveBalls						; move the balls
-		;jsr moveBalls
 		rts
 
 moveBalls:
@@ -226,49 +225,46 @@ mbLoop:
 goForward:
 		clc									; go right routine
 		lda ballXFR,x						; we're going to add the speed to the X paramter
-		adc ballSpd,x 						; using a single byte fixed point fraction
+		adc ballSdF,x 						; using a single byte fixed point fraction
 		sta ballXFR,x 
 		lda ballXLO,x 
-		adc #$00
+		adc ballSdL,x
 		sta ballXLO,x 
 		lda ballXHI,x 
 		adc #$00
 		sta ballxHI,x 
 		lda ballXLO,x 						; see if we hit the right side of the screen
 		cmp #$59		
-		bne placeBall						; no, let's set the sprite on the screen
+		bcc placeBall						; no, let's set the sprite on the screen
 		lda ballxHI,x 						; need to check HI byte as well
 		beq placeBall						; no, place sprite on screen
 		lda #$ff							; yes, change the direction flag to $ff
 		sta ballDir,x 
-		lda #$00							; set the fraction to zero
-		sta ballXFR,x					
+		jsr reverseBack			
 		jsr makeMusic						; hit the note on the SAM chip
 		jsr makeColor						; fill the ball with the correct color
-		;jmp placeBall						; and drop down to the opposite direction
+		bra placeBall						; and drop down to the opposite direction
 goBack:
 		sec 								; go left direction
 		lda ballXFR,x						; subtract the ball speed from the x potition
-		sbc ballSpd,x 
+		sbc ballSdF,x 
 		sta ballXFR,x 
 		lda ballXLO,x 
-		sbc #$00
+		sbc ballSdL,x
 		sta ballXLO,x 
 		lda ballXHI,x 
 		sbc #$00
 		sta ballxHI,x 
 		lda ballXLO,x 						; check if we hit the left side of the screen
 		cmp #$1f					
-		bne placeBall						; no, place the sprite
+		bcs placeBall						; no, place the sprite
 		lda ballxHI,x 						; we need to check the hi byte too
 		bne placeBall						; no, place the sprite
 		lda #$01							; change the ball direction to right
 		sta ballDir,x 
-		lda #$00							; clear the x fraction byte
-		sta ballXFR,x
+		jsr reverseForward
 		jsr makeMusic						; hit the note on the SAM chip
 		jsr makeColor						; fill the ball with the correct color
-		bra goForward						; and run the go forward routine
 placeBall:
 		lda ballXLO,X						; set the sprite position parameter
 		sta VKY_SP0+SP_POS_X_L,Y			
@@ -283,13 +279,47 @@ placeBall:
 doneBallLoop:
 		rts			
 
+reverseBack:
+		sec
+		lda ballXFR,x 
+		sbc #$00
+		sta resultFR
+		lda ballXLO,x 
+		sbc #$59
+		sta resultLO
+		sec
+		lda #$00
+		sbc resultFR
+		sta ballXFR,x 
+		lda #$59
+		sbc resultLO
+		sta ballXLO,x 
+		rts
+
+reverseForward:
+		sec
+		lda #$00
+		sbc ballXFR,x 
+		sta resultFR
+		lda #$1f
+		sbc ballXLO,x 
+		sta resultLO
+		clc
+		lda #$00
+		adc resultFR
+		sta ballXFR,x 
+		lda #$1f
+		adc resultLO
+		sta ballXLO,x
+		rts
+
 makeMusic:									; make midi note
 			
 		lda #$90							; set channel 0
 		sta MIDI_COM
 		lda ballNote,X						; send note value based on what ball hit the edge
 		sta MIDI_COM
-		lda #$7f							; volume is full velocity
+		lda #$40							; volume is default velocity
 		sta MIDI_COM
 		rts
 
@@ -367,7 +397,8 @@ SetTimer:
 ; working memory
 
 ballDir:	.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
-ballSpd:	.byte $f8,$f0,$e8,$e0,$d8,$d0,$c8,$c0,$b8,$b0,$a8,$a0,$98,$90,$88,$80,$78,$70,$68,$60,$58,$50,$48,$40
+ballSdF:	.byte $00,$f0,$e0,$d0,$c0,$b0,$a0,$90,$80,$70,$60,$50,$40,$30,$20,$10,$00,$f0,$e0,$d0,$c0,$b0,$a0,$90
+ballSdL:	.byte $02,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00,$00
 ballXFR:	.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 ballXLO:	.byte $20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20
 ballXHI:	.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
@@ -386,7 +417,8 @@ colorR:		.byte $FF,$BF,        $7F,       $3F,     $00, $00,   $00,   $00,   $00
 colorB:		.byte $FF,$FF,        $FF,       $FF,     $FF, $BF,   $BF,   $BF,   $BF,    $BF, $7F,    $7F,     $7F,$7F,      $3F,   $3F,  $3F,   $3F,       $00, $00,   $00,  $00,    $00,     $00
 
 
-
+resultFR:	.byte $00
+resultLO:	.byte $00
 
 totalColors:	.byte 32
 spriteLoc:		.word $0000
