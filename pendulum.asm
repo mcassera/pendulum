@@ -265,7 +265,7 @@ nextInst:									; This routine selects the next midi insturment
 		clc
 		lda midiInst
 		adc #$01
-		cmp #128
+		cmp #52
 		bcs nInstDone
 		sta midiInst
 nInstDone:	
@@ -476,7 +476,8 @@ reverseForward:
 setMidiInstrument:
 		lda #$c0							; set the instrument for channel 0
 		sta MIDI_COM
-		lda midiInst								; this is the instrument number
+		ldx midiInst								; this is the instrument number
+		lda midiTable,x
 		sta MIDI_COM
 		rts
 
@@ -692,7 +693,8 @@ printgap:
 		rts
 
 printMidiInst:
-		lda midiInst
+		ldx midiInst
+		lda midiTable,x
 		sta MULU_A_L
 		stz MULU_A_H
 		lda #23
@@ -718,7 +720,7 @@ pMidiLoop:
 		lda (ptr_src),y
 		sta (ptr_dst),y
 		inc MMU_IO_CTRL
-		lda #$a0
+		lda #$b0
 		sta (ptr_dst),y
 		iny
 		cpy #23
@@ -762,6 +764,8 @@ ballG:		.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$0
 ballR:		.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 ballB:		.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 
+midiTable:	.byte 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,24,25,26,27,28,32,33,34,35,36,37,38,39,45,46,47     ;31
+			.byte 88,96,98,99,100,103,104,105,106,107,108,112,113,114,115,116,117,118,123,127				;51
 
 ; 				 Cyan,DeepSkyBlue,DodgerBlue,ElecBlue,Blue,Indigo,Violet,Purple,Magenta,Rose,HotPink,DeepPink,Red,Vermilion,Orange,Amber,Yellow,Chartreuse,Lime,BGreen,Green,SpGreen,MedSpGrn,Aqua
 colorG:		.byte $00,$00,        $00,       $00,     $00, $00,   $3F,   $7F,   $BF,    $FF, $FF,    $FF,     $FF,$FF,      $FF,   $FF,  $FF,   $BF,       $7F, $3F,   $00,  $00,    $00,     $00
