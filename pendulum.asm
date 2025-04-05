@@ -24,7 +24,7 @@ start:										; ***TEMP CODE FOR PROGRAMMING***
 
 ;SetupKernel:								; Set up the API to work with
 
-.section zp									; Zero page section $20 to $28
+.section zp									; Zero page section $a0 to $a8
 event:	.dstruct	kernel.event.event_t
 .send
 
@@ -57,11 +57,11 @@ SC:
 
 ; ************************************************************************************************************************************
 ;Set up TinyVicky to display sprites
-		lda #%00100100						; Graphic, Sprites Engine enabled  			|xx|GM|SP|TL|BM|GR|OV|TX|
-		sta VKY_MSTR_CTRL_0					;                  		                    | 0| 0| 1| 0| 0| 1| 0| 0|
+		lda #%00100111						; Graphic, Sprites Engine enabled  			|xx|GM|SP|TL|BM|GR|OV|TX|
+		sta VKY_MSTR_CTRL_0					; Text overlay enabled						| 0| 0| 1| 0| 0| 1| 1| 1|
 
-		lda #%00000000						; Text mode options for the overlay 		|xx|xx|FS|FO|MS|2Y|2X|70|
-		sta VKY_MSTR_CTRL_1					; 320 x 240, 60 Hz, dbl X & Y				| 0| 0| 0| 0| 0| 0| 0| 0|
+		lda #%00000110						; Text mode options for the overlay 		|xx|xx|FS|FO|MS|2Y|2X|70|
+		sta VKY_MSTR_CTRL_1					; 320 x 240, 60 Hz, dbl X & Y				| 0| 0| 0| 0| 0| 1| 1| 0|
 		stz VKY_BRDR_CTRL					; No Border
 
 		lda #$00							; Set the background color
@@ -71,21 +71,24 @@ SC:
 		lda #$00
 		sta VKY_BKG_COL_B
 
+		jsr clrScreen
+		;jsr printMenu
+
 ; ************************************************************************************************************************************
 ; enable 24 sprites
-		lda #<sprite1
+		lda #<sprite1						; location of the first sprite
 		sta spriteLoc
 		lda #>sprite1
 		sta spriteLoc+1
-		ldx #$00
+		ldx #$00							; set x to zero to start
 spriteLoop:
-		txa
+		txa									; transfer to A and multiply by 8
 		asl 
 		asl 
 		asl
-		tay
-		lda #%01100001			; 8x8 sprite, layer 0, lut 0, enable on
-		sta VKY_SP0,y 
+		tay									; transfer result to Y, sprite control data is every 8 bytes
+		lda #%01100001						; 8x8 sprite, layer 0, lut 0, enable on
+		sta VKY_SP0,y 						; from sprite 0 in Vicky indexed to y
 		lda ballXLO,x 
 		sta VKY_SP0+SP_POS_X_L,Y
 		lda #$00
@@ -101,8 +104,8 @@ spriteLoop:
 		lda #$00
 		sta VKY_SP0+SP_AD_H,y
 		clc
-		lda spriteLoc
-		adc #64
+		lda spriteLoc						; each ball has its own sprite. 8x8 sprites are 64 bytes
+		adc #64											
 		sta spriteLoc
 		lda spriteLoc+1
 		adc #$00
@@ -124,7 +127,7 @@ spriteLoop:
 		lda #>VKY_GR_CLUT_0
 		sta ptr_dst+1
 
-		ldx #$00							; X is the number of colors to copy, check for 154
+		ldx #$00							; Y is the number of colors to copy, check for 32
 		ldy #32
 ; ************************************************************************************************************************************
 makeClut:
@@ -161,14 +164,36 @@ comp_loop:
 		jmp color_loop						; and start copying the next color
 done_lut:
 		stz MMU_IO_CTRL
+; ************************************************************************************************************************************
+setFont:									; let's change the font
+		lda #<font
+		sta $80
+		lda #>font
+		sta $81
+		lda #$c1
+		stz $82
+		sta $83
+		ldy #$00
+		ldx #$03
+		lda #$01
+		sta MMU_IO_CTRL
+_sfLoop:
+		lda ($80),y
+		sta ($82),y 
+		iny
+		bne _sfLoop
+		inc $81
+		inc $83
+		dex
+		bne _sfLoop
+		stz MMU_IO_CTRL
+
 
 ; ************************************************************************************************************************************
-; set midi device
-
-		lda #$c0							; set the instrument for channel 0
-		sta MIDI_COM
-		lda #11								; this is the instrument number
-		sta MIDI_COM
+;set initial ball speed, ratio, and midi instrument
+		jsr setBalls
+		jsr setMidiInstrument
+		
 ; ************************************************************************************************************************************
 ; set timer for SOF
 
@@ -187,7 +212,7 @@ skipSet:
 
 loop:
 		
-		jsr handle_events
+		jsr handle_events					; This is my game loop
 		jmp loop
 
 handle_events:
@@ -203,12 +228,145 @@ done_handle_events:
 dispatch:
 		lda event.type						; get the event type from Kernel
 		cmp #kernel.event.timer.EXPIRED		; is the event timer.EXPIRED?
-		beq UpdateScreen					; run the screen update
+		beq UpdateScreenJmp					; run the screen update
+		cmp #kernel.event.key.PRESSED		                     
+        beq keypress	
 		rts
+
+UpdateScreenJmp
+		jmp UpdateScreen					; jmp because conditional is tto far
+
+keypress:
+		lda menuFlag
+		beq checkTab
+        lda event.key.flags               	; Once a key is pressed, we can get the ascii value by loading the byte from the
+        lda event.key.ascii                 ; event.key.ascii location assigned by the kernel. We then check to see if it's a
+		cmp #16								; These are the ascii characters for the menu input!
+		beq moreGap
+		cmp #14
+		beq lessGapJmp						; TAB does not work here. These do not work when the menu is off.
+		cmp #6
+		beq moreSpeed
+		cmp #2
+		beq lessSpeed
+		cmp #105
+		beq nextInst
+		cmp #73
+		beq lastInst
+		cmp #13
+		beq restart
+keyDone:
+		rts
+
+lessGapJmp
+		jmp lessGap							; jmp because conditional is too far away
+
+nextInst:									; This routine selects the next midi insturment
+		clc
+		lda midiInst
+		adc #$01
+		cmp #128
+		bcs nInstDone
+		sta midiInst
+nInstDone:	
+		jsr printMidiInst
+		jsr setMidiInstrument
+		rts
+
+lastInst:									; This routine select the previous instrument
+		sec
+		lda midiInst
+		sbc #$01
+		bmi lInstDone
+		sta midiInst
+lInstDone:	
+		jsr printMidiInst
+		jsr setMidiInstrument
+		rts
+
+restart:									; this is when you hit return. It clears the menu
+		jsr clrScreen						; and restarts the balls from 0
+		jsr resetBalls
+		jsr setBalls
+		stz menuFlag
+		rts
+
+checkTab:									; This looks for the TAB when the program is running to bring up the menu
+		lda event.key.flags               	; Once a key is pressed, we can get the ascii value by loading the byte from the
+		lda event.key.ascii                 ; event.key.ascii location assigned by the kernel. We then check to see if it's a
+		cmp #9 
+		beq runMenu
+		rts
+
+moreGap:									; This increases the gap space between balls, it is a multiple of 4
+		clc									; This does not take effect until RETURN is hit
+		lda speedRatio
+		adc #$04
+		cmp #$44
+		bcs topGap
+		sta speedRatio
+topGap:
+		jsr printGap
+		rts
+
+moreSpeed:									; This increases the speed of the slowest ball. The other balls	
+		clc									; will adjust with the gap setting once RETURN is hit
+		lda speedBase
+		adc #$08
+		sta speedBase
+		lda speedBase+1
+		adc #$00
+		sta speedbase+1
+		cmp #$03
+		bne mSDone
+		stz speedBase
+mSDone:
+		jsr printSpeed
+		rts
+
+lessSpeed:									; This decreases the speed of the slowest ball. The other balls
+		sec									; will adjust once the RETURN is hit.
+		lda speedBase
+		sbc #$08
+		sta speedbase
+		lda speedbase+1
+		sbc #$00
+		sta speedbase+1
+		;lda speedbase+1
+		bne lSpeedDone
+checkSpeedLO:
+		lda speedBase
+		bne lSpeedDone
+		lda #$08
+		sta speedBase
+lSpeedDone:
+		jsr printSpeed
+		rts	
+
+lessGap:									; This decreases the gap space between the balls. The change does not
+		sec									; take affect until RETURN is hit.
+		lda speedRatio
+		sbc #$04
+		cmp #$04
+		bcc bottomGap
+		sta speedRatio
+bottomGap:
+		jsr printGap
+		rts
+
+
+runMenu:
+		jsr printMenu
+		inc menuFlag
+		rts
+
+
+; ************************************************************************************************************************************		
 
 UpdateScreen:
 		jsr SetTimer						; reset timer for next SOF
 		jsr moveBalls						; move the balls
+noMove:
 		rts
 
 moveBalls:
@@ -313,13 +471,22 @@ reverseForward:
 		sta ballXLO,x
 		rts
 
+; ************************************************************************************************************************************
+; set midi device
+setMidiInstrument:
+		lda #$c0							; set the instrument for channel 0
+		sta MIDI_COM
+		lda midiInst								; this is the instrument number
+		sta MIDI_COM
+		rts
+
 makeMusic:									; make midi note
 			
-		lda #$90							; set channel 0
+		lda #$90							; strike a note on channel 0
 		sta MIDI_COM
 		lda ballNote,X						; send note value based on what ball hit the edge
 		sta MIDI_COM
-		lda #$40							; volume is default velocity
+		lda #$40							; set strike velocity ($40 is the default value)
 		sta MIDI_COM
 		rts
 
@@ -370,18 +537,17 @@ assignColor:
 		lda #>VKY_GR_CLUT_0
 		sta ptr_dst+1
 
-		lda ballG,x 						; get the ball color
+		lda ballB,x 						; get the ball color
 		sta (ptr_dst),y						; and store it in the CLUT
 		iny									; incrment y for next color component
 		lda ballR,x 						; and repeat
 		sta (ptr_dst),y 
 		iny
-		lda ballB,x 
+		lda ballG,x 
 		sta (ptr_dst),y 
 		stz MMU_IO_CTRL						; reset mmu IO to zero
 		rts
 ; ************************************************************************************************************************************
-; jsr routines
 SetTimer:	
 		inc $d0
 		lda $d0
@@ -391,21 +557,207 @@ SetTimer:
 		sta kernel.args.timer.units			; store in units parameter
 		jsr kernel.Clock.SetTimer			; jsr to Kernel routine to set timer
 		rts
+; ************************************************************************************************************************************
+setBalls:									; We'll set the base speed for the slowest ball here
+		lda speedBase
+		ldx #23 
+		sta ballSdF,X
+		lda speedBase+1
+		sta ballSdL,X
+		dex
+		
+sbLoop:
+		clc									; Then we'll add the speed ratio to each ball up the chain
+		lda ballSdF+1,X						; so each ball is faster than the previous.
+		adc speedRatio						; save these values in our speed table
+		sta ballSdF,X
+		lda ballSdL+1,X
+		adc #$00
+		sta ballSdL,X
+		dex
+		bmi sbDone
+		bra sbLoop
+sbDone:
+		rts
+; ************************************************************************************************************************************
+clrScreen:
+		ldx #$00							; set x for indexing
+csLoop:
+		lda #$02							; set the output to character matrix
+		sta MMU_IO_CTRL
+		lda #$20							; set a to a blank character
+		sta $c000+$000,x 					; and save every 240 memory locations
+		sta $c000+$0f0,x 					;
+		sta $c000+$1e0,x 					; We're only going to loop once instead of
+		sta $c000+$2d0,x 					; nesting loops
+		sta $c000+$3c0,x 
+		lda #$03							; set the output to the color matrix
+		sta MMU_IO_CTRL
+		lda #$f0							; pick white
+		sta $c000+$000,x 					; do the same save groups
+		sta $c000+$0f0,x 
+		sta $c000+$1e0,x 
+		sta $c000+$2d0,x 
+		sta $c000+$3c0,x 
+		inx									; inc x
+		cpx #$f1 							; and check if we've hit 241
+		bcc csLoop							; if less, continue looping
 
+		stz MMU_IO_CTRL						; reset IO to 0
+		rts
 
 ; ************************************************************************************************************************************
-; working memory
+printMenu:
+		ldx #$00
+pMenuLoop:
+		lda menu,x
+		cmp #$ff
+		beq pMenuDone
+		sta ptr_dst
+		inx
+		lda menu,x
+		sta ptr_dst+1
+		inx
+		lda menu,x
+		sta ptr_src
+		inx
+		lda menu,x 
+		sta ptr_src+1
+		jsr outputText
+		inx
+		bra pMenuLoop
+pMenuDone:
+		jsr printSpeed 
+		jsr printGap
+		jsr printMidiInst
+		
+		rts
 
+outputText:
+		lda #$02
+		sta MMU_IO_CTRL
+		ldy #$00
+oTextLoop:
+		lda (ptr_src),y
+		cmp #94
+		beq oTextDone
+		sta (ptr_dst),y
+		iny
+		bra oTextLoop
+oTextDone:
+		stz MMU_IO_CTRL
+		rts
+
+printSpeed:
+		lda #$02
+		sta MMU_IO_CTRL
+		lda speedbase+1
+		and #$0f
+		tax
+		lda hex,x 
+		sta $c161
+		lda speedbase
+		lsr
+		lsr
+		lsr
+		lsr
+		tax
+		lda hex,X
+		sta $c161+1
+		lda speedbase
+		and #$0f
+		tax
+		lda hex,x 
+		sta $c161+2
+		stz MMU_IO_CTRL
+		rts
+
+printgap:
+		lda #$02
+		sta MMU_IO_CTRL
+		lda speedRatio
+		lsr
+		lsr
+		lsr
+		lsr
+		tax
+		lda hex,x 
+		sta $c1b1
+		lda speedRatio
+		and #$0f
+		tax
+		lda hex,x
+		sta $c1b1+1
+		stz MMU_IO_CTRL
+		rts
+
+printMidiInst:
+		lda midiInst
+		sta MULU_A_L
+		stz MULU_A_H
+		lda #23
+		sta MULU_B_L
+		stz MULU_B_H
+		clc
+		lda MULU_LL
+		adc #<instrumentList
+		sta ptr_src
+		lda MULU_LH
+		adc #>instrumentList
+		sta ptr_src+1
+		lda #$33
+		sta ptr_dst
+		lda #$c2 
+		sta ptr_dst+1
+		lda #$02
+		sta MMU_IO_CTRL
+		ldy #$00
+pMidiLoop:
+		lda #$02
+		sta MMU_IO_CTRL
+		lda (ptr_src),y
+		sta (ptr_dst),y
+		inc MMU_IO_CTRL
+		lda #$a0
+		sta (ptr_dst),y
+		iny
+		cpy #23
+		bcc pMidiLoop
+		stz MMU_IO_CTRL
+		rts
+; ************************************************************************************************************************************
+
+resetBalls:
+		ldx #00
+rBallLoop:
+		lda #$20
+		sta ballXLO,X
+		lda #$00
+		sta ballxHI,x 
+		sta ballXFR,x 
+		lda #$01
+		sta ballDir,x 
+		inx
+		cpx #24
+		bcc rBallLoop
+		rts
+; ************************************************************************************************************************************
+; working memory
+; ball direction
 ballDir:	.byte $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
+; ball speed
 ballSdF:	.byte $00,$f0,$e0,$d0,$c0,$b0,$a0,$90,$80,$70,$60,$50,$40,$30,$20,$10,$00,$f0,$e0,$d0,$c0,$b0,$a0,$90
 ballSdL:	.byte $02,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$00,$00,$00,$00,$00,$00,$00
+; ball X position
 ballXFR:	.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 ballXLO:	.byte $20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20,$20
 ballXHI:	.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+; ball Y position
 ballYLO:	.byte $21,$2b,$35,$3f,$49,$53,$5d,$67,$71,$7b,$85,$8f,$99,$a3,$ad,$b7,$c1,$cb,$d5,$df,$e9,$f3,$fd,$07
 ballYHI:	.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$01
-;midi notes, middle C0 down to C2
+; midi notes, middle C0 down to C2
 ballNote:	.byte 60, 59, 58, 57, 56, 55, 54, 53, 52 ,51 ,50, 49, 48, 47, 46, 45, 44, 43, 42, 41, 40, 39, 38, 37
+; Ball color
 ballG:		.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 ballR:		.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 ballB:		.byte $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
@@ -416,13 +768,22 @@ colorG:		.byte $00,$00,        $00,       $00,     $00, $00,   $3F,   $7F,   $BF
 colorR:		.byte $FF,$BF,        $7F,       $3F,     $00, $00,   $00,   $00,   $00,    $00, $00,    $00,     $00,$3F,      $7F,   $BF,  $FF,   $FF,       $FF, $FF,   $FF,  $FF,    $FF,     $FF
 colorB:		.byte $FF,$FF,        $FF,       $FF,     $FF, $BF,   $BF,   $BF,   $BF,    $BF, $7F,    $7F,     $7F,$7F,      $3F,   $3F,  $3F,   $3F,       $00, $00,   $00,  $00,    $00,     $00
 
+speedBase:		.word $0090 					; The slowest ball speed
+speedRatio:		.byte $10						; the amount between balls
 
-resultFR:	.byte $00
-resultLO:	.byte $00
+resultFR:		.byte $00
+resultLO:		.byte $00
 
+midiInst:		.byte 11
 totalColors:	.byte 32
 spriteLoc:		.word $0000
 
+menuFlag:		.byte $00
+hex:			.text "0123456789abcdef"
 
 
+font:
+.binary "atari.bin"
+.include "menu.s"
 .include "ball.s"
+.include "midi_instruments.s"
