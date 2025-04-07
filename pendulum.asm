@@ -234,7 +234,14 @@ dispatch:
 		rts
 
 UpdateScreenJmp
-		jmp UpdateScreen					; jmp because conditional is tto far
+		jmp UpdateScreen					; jmp because conditional is to far
+
+quit:
+		stz MMU_IO_CTRL						; reset mmu to zero
+		lda #$01							
+		sta VKY_MSTR_CTRL_0					; reset the graphics chip
+		stz VKY_MSTR_CTRL_1					; reset text size 
+		jmp $e020							; jump to kernel reset
 
 keypress:
 		lda menuFlag
@@ -253,6 +260,8 @@ keypress:
 		beq nextInst
 		cmp #73
 		beq lastInst
+		cmp #113
+		beq quit
 		cmp #13
 		beq restart
 keyDone:
@@ -302,7 +311,7 @@ moreGap:									; This increases the gap space between balls, it is a multiple 
 		clc									; This does not take effect until RETURN is hit
 		lda speedRatio
 		adc #$04
-		cmp #$44
+		cmp #$a4
 		bcs topGap
 		sta speedRatio
 topGap:
@@ -624,6 +633,9 @@ pMenuLoop:
 		inx
 		lda menu,x 
 		sta ptr_src+1
+		inx 
+		lda menu,x 
+		sta txtColor
 		jsr outputText
 		inx
 		bra pMenuLoop
@@ -643,6 +655,10 @@ oTextLoop:
 		cmp #94
 		beq oTextDone
 		sta (ptr_dst),y
+		inc MMU_IO_CTRL
+		lda txtColor
+		sta (ptr_dst),y
+		dec MMU_IO_CTRL
 		iny
 		bra oTextLoop
 oTextDone:
@@ -670,6 +686,13 @@ printSpeed:
 		tax
 		lda hex,x 
 		sta $c161+2
+		inc MMU_IO_CTRL
+		lda #$b0
+		sta $c160
+		sta $c161
+		sta $c162
+		sta $c163
+		stz MMU_IO_CTRL
 		stz MMU_IO_CTRL
 		rts
 
@@ -684,11 +707,17 @@ printgap:
 		tax
 		lda hex,x 
 		sta $c1b1
+		
 		lda speedRatio
 		and #$0f
 		tax
 		lda hex,x
 		sta $c1b1+1
+		inc MMU_IO_CTRL
+		lda #$b0
+		sta $c1b0
+		sta $c1b1
+		sta $c1b2
 		stz MMU_IO_CTRL
 		rts
 
@@ -781,7 +810,7 @@ resultLO:		.byte $00
 midiInst:		.byte 11
 totalColors:	.byte 32
 spriteLoc:		.word $0000
-
+txtColor:		.byte $00
 menuFlag:		.byte $00
 hex:			.text "0123456789abcdef"
 
